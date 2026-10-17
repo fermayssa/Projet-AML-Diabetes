@@ -8,7 +8,7 @@ détectés **automatiquement** : personne n'a besoin de modifier les fichiers co
 
 | Membre | Objectif | Dossier du module | Branche Git |
 |---|---|---|---|
-| (Mayssa) | Segmentation des patients (clustering, K-Means) | `modules/segmentation` | `feature/segmentation` |
+| (nom) | Segmentation des patients (clustering, K-Means) | `modules/segmentation` | `feature/segmentation` |
 | (nom) | (objectif) | `modules/...` | `feature/...` |
 | (nom) | (objectif) | `modules/...` | `feature/...` |
 | (nom) | (objectif) | `modules/...` | `feature/...` |
@@ -36,8 +36,8 @@ projet-aml-diabetes/
 ## Installation (une fois par personne)
 
 ```bash
-git clone https://github.com/<compte>/Projet-AML-Diabetes.git
-cd Projet-AML-Diabetes
+git clone https://github.com/<compte>/projet-aml-diabetes.git
+cd projet-aml-diabetes
 python -m venv venv
 venv\Scripts\activate            # Windows
 source venv/bin/activate         # Mac / Linux
