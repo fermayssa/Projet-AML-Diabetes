@@ -1,0 +1,17 @@
+body { font-family: Arial, sans-serif; margin: 0; color: #222; background: #f6f7f9; }
+header { background: #1f4e79; padding: 14px 24px; }
+header .brand { color: #fff; text-decoration: none; font-weight: bold; font-size: 18px; }
+main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+footer { text-align: center; color: #777; font-size: 13px; padding: 24px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.card { background: #fff; border: 1px solid #dde; border-radius: 8px; padding: 16px; text-decoration: none; color: inherit; }
+.card:hover { border-color: #1f4e79; }
+.card h2 { margin-top: 0; font-size: 18px; color: #1f4e79; }
+.warn { background: #fff3cd; border: 1px solid #ffe08a; padding: 8px 16px; border-radius: 6px; margin-top: 24px; }
+.error { background: #f8d7da; border: 1px solid #f1aeb5; padding: 8px 16px; border-radius: 6px; }
+form fieldset { background: #fff; border: 1px solid #dde; border-radius: 8px; margin-bottom: 16px; }
+form label { display: block; margin: 8px 0; }
+form input[type=number], form select { width: 100%; padding: 6px; box-sizing: border-box; }
+button { background: #1f4e79; color: #fff; border: 0; padding: 10px 20px; border-radius: 6px; font-size: 16px; cursor: pointer; }
+table { border-collapse: collapse; background: #fff; }
+td, th { border: 1px solid #dde; padding: 6px 12px; text-align: left; }

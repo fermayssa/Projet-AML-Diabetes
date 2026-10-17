@@ -1,0 +1,10 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+.ipynb_checkpoints/
+# jeu de données : trop volumineux, chacun le télécharge depuis l'UCI
+*.csv
+*.zip

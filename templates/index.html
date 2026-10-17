@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Modèles disponibles</h1>
+<p>Chaque membre du groupe a son propre module.</p>
+
+{% if modules %}
+<div class="cards">
+  {% for m in modules %}
+  <a class="card" href="{{ m.url }}/">
+    <h2>{{ m.title }}</h2>
+    <p>{{ m.description }}</p>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p>Aucun module pour le moment.</p>
+{% endif %}
+
+{% if failed %}
+<div class="warn">
+  <h3>Modules en erreur</h3>
+  <ul>{% for f in failed %}<li><b>{{ f.name }}</b> : {{ f.error }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% endblock %}

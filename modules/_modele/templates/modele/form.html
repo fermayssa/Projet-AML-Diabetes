@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Titre du formulaire</h1>
+<form method="post" action="{{ url_for(request.blueprint ~ '.predict') }}">
+  <label>Exemple de champ
+    <input type="number" name="exemple" value="0">
+  </label>
+  <button type="submit">Prédire</button>
+</form>
+{% endblock %}
