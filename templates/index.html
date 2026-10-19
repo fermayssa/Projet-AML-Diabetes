@@ -1,25 +1,201 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>Modèles disponibles</h1>
-<p>Chaque membre du groupe a son propre module.</p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Prédiction Diabète</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f6f9; }
+        .container { max-width: 600px; background: white; padding: 25px; border-radius: 8px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; font-size: 16px; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        .result { margin-top: 25px; padding: 15px; background: #e9ecef; border-radius: 6px; text-align: center; }
+    </style>
+</head>
+<body>
 
-{% if modules %}
-<div class="cards">
-  {% for m in modules %}
-  <a class="card" href="{{ m.url }}/">
-    <h2>{{ m.title }}</h2>
-    <p>{{ m.description }}</p>
-  </a>
-  {% endfor %}
-</div>
-{% else %}
-<p>Aucun module pour le moment.</p>
-{% endif %}
+<div class="container">
+    <h2>Prédiction de Changement de Médicament</h2>
+    
+    <form action="/predict" method="post">
+        
+        <!-- Nouveaux champs ajoutés -->
+        <div class="form-group">
+            <label>Genre :</label>
+            <select name="gender">
+                <option value="Male">Homme</option>
+                <option value="Female">Femme</option>
+            </select>
+        </div>
 
-{% if failed %}
-<div class="warn">
-  <h3>Modules en erreur</h3>
-  <ul>{% for f in failed %}<li><b>{{ f.name }}</b> : {{ f.error }}</li>{% endfor %}</ul>
+        <div class="form-group">
+            <label>Origine / Ethnie (Race) :</label>
+            <select name="race">
+                <option value="Caucasian">Caucasien</option>
+                <option value="AfricanAmerican">Afro-américain</option>
+                <option value="Hispanic">Hispanique</option>
+                <option value="Asian">Asiatique</option>
+                <option value="Other">Autre</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Durée du séjour à l'hôpital (jours) :</label>
+            <input type="number" name="time_in_hospital" value="3" required>
+        </div>
+
+        <div class="form-group">
+            <label>Résultat Glucose Max (max_glu_serum) :</label>
+            <select name="max_glu_serum">
+                <option value="None">Non mesuré (None)</option>
+                <option value="Norm">Normal</option>
+                <option value=">200">> 200</option>
+                <option value=">300">> 300</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Résultat A1C (A1Cresult) :</label>
+            <select name="A1Cresult">
+                <option value="None">Non mesuré (None)</option>
+                <option value="Norm">Normal</option>
+                <option value=">7">> 7%</option>
+                <option value=">8">> 8%</option>
+            </select>
+        </div>
+
+        <!-- Champs existants -->
+        <div class="form-group">
+            <label>Âge du patient :</label>
+            <input type="number" name="age" value="65" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de procédures de laboratoire :</label>
+            <input type="number" name="num_lab_procedures" value="40" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre d'autres procédures :</label>
+            <input type="number" name="num_procedures" value="1" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de médicaments :</label>
+            <input type="number" name="num_medications" value="10" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de diagnostics :</label>
+            <input type="number" name="number_diagnoses" value="7" required>
+        </div>
+
+        <div class="form-group">
+            <label>Hospitalisations précédentes (Inpatient) :</label>
+            <input type="number" name="number_inpatient" value="0" required>
+        </div>
+
+        <div class="form-group">
+            <label>Visites externes (Outpatient) :</label>
+            <input type="number" name="number_outpatient" value="0" required>
+        </div>
+
+        <div class="form-group">
+            <label>Visites d'urgence (Emergency) :</label>
+            <input type="number" name="number_emergency" value="0" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de changements de médicaments :</label>
+            <input type="number" name="num_med_changes" value="1" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de médicaments actifs :</label>
+            <input type="number" name="num_active_meds" value="2" required>
+        </div>
+
+        <div class="form-group">
+            <label>Type d'admission :</label>
+            <select name="admission_type">
+                <option value="Emergency">Urgence</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Elective">Programmé</option>
+                <option value="Unknown">Inconnu</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Source d'admission :</label>
+            <select name="admission_source">
+                <option value="Emergency_Room">Salle d'urgence</option>
+                <option value="Referral">Recommandation</option>
+                <option value="Transfer">Transfert</option>
+                <option value="Other_Unknown">Autre</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Destination de sortie :</label>
+            <select name="discharge_disposition">
+                <option value="Home">Domicile</option>
+                <option value="Home_health">Soin à domicile</option>
+                <option value="Facility">Établissement spécialisé</option>
+                <option value="Other">Autre</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Diagnostic principal (Diag 1) :</label>
+            <select name="diag_1">
+                <option value="Circulatory">Circulatoire</option>
+                <option value="Respiratory">Respiratoire</option>
+                <option value="Digestive">Digestif</option>
+                <option value="Diabetes">Diabète</option>
+                <option value="Other">Autre</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Diagnostic 2 :</label>
+            <select name="diag_2">
+                <option value="Diabetes">Diabète</option>
+                <option value="Circulatory">Circulatoire</option>
+                <option value="Other">Autre</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Diagnostic 3 :</label>
+            <select name="diag_3">
+                <option value="Other">Autre</option>
+                <option value="Diabetes">Diabète</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Spécialité médicale :</label>
+            <select name="medical_specialty">
+                <option value="InternalMedicine">Médecine interne</option>
+                <option value="Emergency/Trauma">Urgence / Traumatologie</option>
+                <option value="Family/GeneralPractice">Médecine générale</option>
+                <option value="Other">Autre</option>
+            </select>
+        </div>
+
+        <button type="submit">Prédire</button>
+    </form>
+
+    {% if prediction_text %}
+    <div class="result">
+        <h3>Résultat : {{ prediction_text }}</h3>
+        <p>Probabilité estimée : <strong>{{ probability_text }}</strong></p>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
-{% endblock %}
+
+</body>
+</html>

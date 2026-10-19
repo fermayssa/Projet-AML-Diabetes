@@ -1,8 +1,6 @@
-# Dépendances COMMUNES. Une seule personne modifie ce fichier (voir README).
-# IMPORTANT : mettre pour scikit-learn la MÊME version que celle utilisée dans Colab
-# (dans Colab : import sklearn; print(sklearn.__version__)), par exemple scikit-learn==1.6.1
-flask>=3.0
-numpy
+flask
 pandas
+numpy
 scikit-learn
+xgboost
 joblib
