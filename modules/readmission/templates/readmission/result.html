@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Résultat : {{ r.info.label }}</h1>
+
+{% if r.alerte %}
+<div class="warn">
+  <b>Alerte : patient à surveiller en priorité.</b>
+  Sa probabilité de réadmission en moins de 30 jours ({{ r.p30_pct }} %) dépasse le seuil d'alerte ({{ r.seuil_pct }} %).
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Catégorie la plus probable : {{ r.info.name }}</h2>
+  <p><b>Action suggérée :</b> {{ r.info.action }}</p>
+</div>
+
+<h3>Probabilité de chaque catégorie</h3>
+<table>
+  <tr><th>Catégorie</th><th>Sens</th><th>Probabilité</th></tr>
+  {% for p in r.probas %}
+  <tr {% if p.best %}style="font-weight:bold"{% endif %}>
+    <td>{{ p.name }}</td><td>{{ p.label }}</td>
+    <td>{{ p.pct }} %
+      <div style="background:#d0dcea;width:160px;height:8px;border-radius:4px;display:inline-block;vertical-align:middle;margin-left:8px">
+        <div style="background:#1f4e79;width:{{ p.pct }}%;height:8px;border-radius:4px"></div>
+      </div></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>Comment lire ce résultat</h3>
+<p>
+  La catégorie la plus probable est celle qui a la plus forte probabilité. L'alerte, elle, repose uniquement sur la probabilité
+  de réadmission en moins de 30 jours : un patient peut donc avoir « &gt;30 » ou « NO » comme catégorie la plus probable
+  et déclencher quand même l'alerte.
+</p>
+<p><small>
+  Fiabilité du modèle (jeu de test) : accuracy {{ (r.metrics.accuracy * 100) | round(1) }} %
+  contre {{ (r.metrics.baseline_accuracy * 100) | round(1) }} % pour un modèle qui répondrait toujours « NO ».
+  En suivant les {{ r.stats.share_alerted_pct }} % de patients les plus à risque, on repère environ
+  {{ r.stats.recall_pct }} % des réadmissions &lt; 30 jours ({{ r.stats.precision_pct }} % des alertes sont de vrais cas,
+  contre {{ r.stats.base_rate_pct }} % dans la population). Démonstration pédagogique : ces résultats sont des hypothèses
+  à valider par des cliniciens.
+</small></p>
+
+<p><a href="{{ url_for('readmission.form') }}">← Nouvelle saisie</a></p>
+{% endblock %}
