@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Fiche patient - Classification DiabMed{% endblock %}
+
+{# ---------- Éléments réutilisables ---------- #}
+{% macro icon(kind) %}
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
+     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  {% if kind == "user" %}<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+  {% elif kind == "bed" %}<path d="M3 6v13M3 15h18v4M21 15v-2.5A2.5 2.5 0 0 0 18.5 10H11v5"/><circle cx="7" cy="11.5" r="1.8"/>
+  {% elif kind == "clock" %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+  {% elif kind == "door" %}<path d="M4 12h11M11 8l4 4-4 4M20 4v16"/>
+  {% elif kind == "drop" %}<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>
+  {% endif %}
+</svg>
+{% endmacro %}
+
+{% macro num_field(name, label, lo, hi, default, values) %}
+<div class="field">
+  <label for="f-{{ name }}">{{ label|replace(" (année précédente)", "") }}</label>
+  <input type="number" id="f-{{ name }}" name="{{ name }}" min="{{ lo }}" max="{{ hi }}" step="1"
+         value="{{ values.get(name, default) }}" required>
+  <span class="hint">Entre {{ lo }} et {{ hi }}</span>
+</div>
+{% endmacro %}
+
+{% macro select_field(var, label, options, mode, values) %}
+{% set pretty = {"Female": "Femme", "Male": "Homme", "Non mesure": "Non mesuré", "Norm": "Normal"} %}
+<div class="field">
+  <label for="f-{{ var }}">{{ label }}</label>
+  <select id="f-{{ var }}" name="{{ var }}">
+    {% for code, text in options %}
+    <option value="{{ code }}" {% if values.get(var, mode) == code %}selected{% endif %}>{{ pretty.get(text, text) }}</option>
+    {% endfor %}
+  </select>
+</div>
+{% endmacro %}
+
+{% block content %}
+<style>
+.dm{--ink:#1b2733;--muted:#5b6b7b;--line:#dbe3ec;--brand:#1f4e79;--brand-dark:#173d5f;--danger:#a4262c;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink)}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+/* bandeau d'en-tête */
+.dm .hero{background:linear-gradient(120deg,#1f4e79 0%,#27688f 55%,#1c7c80 100%);color:#fff;border-radius:12px;
+  padding:26px 28px 22px;margin:4px 0 20px}
+.dm .hero h1{font-size:30px;line-height:1.15;letter-spacing:-.015em;margin:0 0 8px;font-weight:700;color:#fff}
+.dm .hero p{margin:0;max-width:60ch;line-height:1.5;color:#e3eef7}
+.dm .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.dm .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;font-size:13px;
+  font-weight:600;color:#fff;text-decoration:none;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.34)}
+.dm .chip:hover{background:rgba(255,255,255,.24)}
+.dm .chip:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.dm .chip i{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px #fff}
+
+.dm .sheet{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+
+/* sections : une couleur par thème */
+.dm .section{--accent:var(--brand);--tint:#e6eef6;display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px 32px;
+  padding:26px 28px 26px 24px;border-left:6px solid var(--accent);scroll-margin-top:16px}
+.dm .section + .section{border-top:1px solid var(--line)}
+.dm .side .badge{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;
+  background:var(--tint);color:var(--accent);margin-bottom:12px}
+.dm .side h2{font-size:17px;margin:0 0 4px;font-weight:700;color:var(--accent)}
+.dm .side .desc{margin:0;color:var(--muted);font-size:13.5px;line-height:1.45}
+.dm .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px;align-content:start}
+.dm .field{display:flex;flex-direction:column;gap:6px}
+.dm .field label{margin:0;font-size:14px;font-weight:600;display:block}
+.dm .field .hint{font-size:12.5px;color:var(--muted)}
+.dm .field input,.dm .field select{width:100%;height:42px;padding:0 12px;box-sizing:border-box;border:1px solid #b9c5d1;
+  border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:15px}
+.dm .field input:hover,.dm .field select:hover{border-color:var(--accent)}
+.dm .field input:focus-visible,.dm .field select:focus-visible{outline:3px solid var(--tint);border-color:var(--accent);
+  box-shadow:0 0 0 1px var(--accent)}
+
+/* barre d'actions */
+.dm .actions{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 28px;
+  border-top:1px solid var(--line);background:#eef4f9}
+.dm .actions .note{margin:0;color:var(--muted);font-size:13px;max-width:44ch;line-height:1.4}
+.dm .actions .buttons{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px 20px;margin-left:auto}
+.dm .btn{display:inline-block;background:linear-gradient(120deg,#1f4e79,#1c7c80);color:#fff;border:0;border-radius:8px;
+  padding:12px 26px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.dm .btn:hover{filter:brightness(1.12)}
+.dm .btn:focus-visible,.dm .link:focus-visible{outline:3px solid rgba(31,78,121,.4);outline-offset:2px}
+.dm .link{white-space:nowrap;color:var(--brand);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+
+/* messages */
+.dm .error,.dm .warn{margin:0 0 16px;padding:12px 16px;border-radius:8px;background:#fff;line-height:1.45;font-size:14.5px}
+.dm .error{border:1px solid #e3b4b7;border-left:4px solid var(--danger);color:#5c1a1d}
+.dm .warn{border:1px solid #ecd9a8;border-left:4px solid #b7791f;color:#5c4311}
+
+@media (max-width:760px){
+  .dm .hero{padding:20px 18px 18px}
+  .dm .section{grid-template-columns:minmax(0,1fr);padding:20px 18px 22px 16px}
+  .dm .side{display:grid;grid-template-columns:44px 1fr;column-gap:12px;align-items:center}
+  .dm .side .badge{grid-row:span 2;margin:0}
+  .dm .actions{padding:16px 18px}
+}
+@media (max-width:520px){
+  .dm .fields{grid-template-columns:minmax(0,1fr)}
+  .dm .hero h1{font-size:25px}
+}
+</style>
+
+{# Sections : (titre, description, champs, couleur, fond clair, icône) #}
+{% set groups = [
+  ("Patient", "Âge et profil du patient.", ["age", "gender", "race"], "#1f4e79", "#e6eef6", "user"),
+  ("Séjour hospitalier", "Durée et intensité de la prise en charge pendant cette hospitalisation.",
+     ["time_in_hospital", "number_diagnoses", "num_lab_procedures", "num_procedures", "num_medications"],
+     "#0f766e", "#e0f2ef", "bed"),
+  ("Antécédents", "Recours aux soins pendant l'année qui précède ce séjour.",
+     ["number_outpatient", "number_emergency", "number_inpatient"], "#b45309", "#fcefdc", "clock"),
+  ("Admission et sortie", "Comment le patient est arrivé à l'hôpital et où il est allé ensuite.",
+     ["admission_type_id", "admission_source_id", "discharge_disposition_id"], "#6d4aa3", "#eee9f7", "door"),
+  ("Analyses biologiques", "Résultats mesurés pendant le séjour.", ["A1Cresult", "max_glu_serum"],
+     "#b4234a", "#fbe6ec", "drop"),
+] %}
+
+<div class="dm">
+  <div class="hero">
+    <h1>Fiche patient</h1>
+    <p>Renseignez les données d'hospitalisation du patient. Le modèle estime s'il suit un traitement
+      antidiabétique (<i>diabetesMed</i>).</p>
+    {% if ready %}
+    <nav class="chips" aria-label="Aller à une section">
+      {% for title, desc, names, color, tint, ico in groups %}
+      <a class="chip" href="#sec-{{ loop.index }}" style="--accent: {{ color }}"><i></i>{{ title }}</a>
+      {% endfor %}
+    </nav>
+    {% endif %}
+  </div>
+
+  {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+  {% if warning %}<div class="warn">{{ warning }}</div>{% endif %}
+
+  {% if ready %}
+  <form method="post" action="{{ url_for(request.blueprint ~ '.predict') }}" class="sheet">
+    {% for title, desc, names, color, tint, ico in groups %}
+    <section class="section" id="sec-{{ loop.index }}" style="--accent: {{ color }}; --tint: {{ tint }}">
+      <div class="side">
+        <div class="badge">{{ icon(ico) }}</div>
+        <h2>{{ title }}</h2>
+        <p class="desc">{{ desc }}</p>
+      </div>
+      <div class="fields">
+        {% for n in names %}
+          {% for name, label, lo, hi, default in numeric if name == n %}
+            {{ num_field(name, label, lo, hi, default, values) }}
+          {% endfor %}
+          {% for var, label, options, mode in nominal if var == n %}
+            {{ select_field(var, label, options, mode, values) }}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+
+    <div class="actions">
+      <p class="note">Les champs sont préremplis avec des valeurs typiques du jeu de données.</p>
+      <div class="buttons">
+        <a class="link" href="{{ url_for(request.blueprint ~ '.form') }}">Valeurs par défaut</a>
+        <button type="submit" class="btn">Lancer la prédiction</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,5 @@
+# Empêche Git de modifier les fins de ligne des fichiers binaires (sinon le modèle est corrompu)
+*.joblib binary
+*.pkl binary
+*.ubj binary
+*.json text eol=lf

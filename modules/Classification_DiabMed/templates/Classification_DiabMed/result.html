@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Résultat - Classification DiabMed{% endblock %}
+
+{# nombre avec virgule décimale (89.3 -> 89,3) #}
+{% macro fr(x) %}{{ x|string|replace('.', ',') }}{% endmacro %}
+
+{% block content %}
+<style>
+.dm{--ink:#1b2733;--muted:#5b6b7b;--line:#dbe3ec;--brand:#1f4e79;--no:#0f766e;--no-tint:#e0f2ef;--yes:#1f4e79;--yes-tint:#e6eef6;
+  --w:0;--s:0;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink)}
+
+/* bandeau d'en-tête */
+.dm .hero{background:linear-gradient(120deg,#1f4e79 0%,#27688f 55%,#1c7c80 100%);color:#fff;border-radius:12px;
+  padding:26px 28px 24px;margin:4px 0 20px}
+.dm .hero h1{font-size:30px;line-height:1.15;letter-spacing:-.015em;margin:0 0 8px;font-weight:700;color:#fff}
+.dm .hero p{margin:0;max-width:60ch;line-height:1.5;color:#e3eef7}
+
+.dm .sheet{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+
+/* verdict : la couleur dépend de l'issue (vert-bleu = sans traitement, bleu = sous traitement) */
+.dm .verdict{--accent:var(--yes);--tint:var(--yes-tint);padding:28px 28px 28px 24px;border-left:6px solid var(--accent)}
+.dm .verdict.is-no{--accent:var(--no);--tint:var(--no-tint)}
+.dm .head{display:flex;align-items:center;gap:16px}
+.dm .badge{display:flex;align-items:center;justify-content:center;flex:none;width:56px;height:56px;border-radius:14px;
+  background:var(--tint);color:var(--accent)}
+.dm .outcome{font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.2;margin:0;color:var(--accent)}
+.dm .code{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+/* jauge : les valeurs arrivent par les variables --w et --s (en %) définies dans le HTML */
+.dm .gauge-wrap{margin:36px 0 6px}
+.dm .gauge{position:relative;height:16px;border-radius:8px;background:#e8edf3}
+.dm .gauge-fill{width:calc(var(--w) * 1%);height:100%;border-radius:8px;background:linear-gradient(90deg,#14a39a,var(--no));animation:dm-fill .9s cubic-bezier(.2,.7,.2,1)}
+.dm .gauge-mark{position:absolute;left:calc(var(--s) * 1%);top:-8px;width:3px;height:32px;border-radius:2px;background:var(--ink);transform:translateX(-1.5px)}
+.dm .gauge-mark span{position:absolute;top:36px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12.5px;font-weight:700}
+.dm .gauge-scale{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted)}
+
+/* deux chiffres clés */
+.dm .figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:38px 0 0;padding:0}
+.dm .figures div{border-radius:10px;padding:14px 16px}
+.dm .figures .f-no{background:var(--no-tint);color:#0b5a54}
+.dm .figures .f-yes{background:var(--yes-tint);color:#173d5f}
+.dm .figures dt{font-size:13.5px;font-weight:600}
+.dm .figures dd{margin:2px 0 0;font-size:28px;font-weight:700;letter-spacing:-.01em}
+.dm .explain{margin:20px 0 0;max-width:64ch;line-height:1.55}
+
+/* fiabilité du modèle */
+.dm .perf{padding:24px 28px 26px 24px;border-top:1px solid var(--line);border-left:6px solid #6d4aa3}
+.dm .perf h2{font-size:17px;font-weight:700;margin:0 0 2px;color:#6d4aa3}
+.dm .perf .desc{margin:0 0 16px;color:var(--muted);font-size:13.5px}
+.dm .metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0;padding:0}
+.dm .metrics div{border-radius:10px;padding:12px 16px;background:var(--tint);border-top:3px solid var(--accent)}
+.dm .metrics dt{font-size:13px;font-weight:600;color:var(--accent)}
+.dm .metrics dd{margin:2px 0 0;font-size:24px;font-weight:700}
+
+/* barre d'actions */
+.dm .actions{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 28px;
+  border-top:1px solid var(--line);background:#eef4f9}
+.dm .actions .note{margin:0;color:var(--muted);font-size:13px;max-width:56ch;line-height:1.4}
+.dm .btn{display:inline-block;background:linear-gradient(120deg,#1f4e79,#1c7c80);color:#fff;border-radius:8px;padding:12px 26px;
+  font-size:15px;font-weight:600;text-decoration:none;white-space:nowrap;margin-left:auto}
+.dm .btn:hover{filter:brightness(1.12)}
+.dm .btn:focus-visible{outline:3px solid rgba(31,78,121,.4);outline-offset:2px}
+
+@keyframes dm-fill{from{width:0}}
+@media (prefers-reduced-motion:reduce){.dm .gauge-fill{animation:none}}
+@media (max-width:760px){
+  .dm .hero{padding:20px 18px}
+  .dm .verdict{padding:22px 18px 24px 16px}
+  .dm .perf{padding:20px 18px 22px 16px}
+  .dm .actions{padding:16px 18px}
+  .dm .metrics{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  .dm .hero h1{font-size:25px}
+  .dm .outcome{font-size:22px}
+  .dm .figures{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+
+{% set mcolors = [("#b45309", "#fcefdc"), ("#6d4aa3", "#eee9f7"), ("#b4234a", "#fbe6ec")] %}
+
+<div class="dm">
+  <div class="hero">
+    <h1>Résultat de la classification</h1>
+    <p>Estimation du modèle {{ r.modele }} pour le patient saisi.</p>
+  </div>
+
+  <div class="sheet">
+    <section class="verdict {% if r.is_no %}is-no{% endif %}">
+      <div class="head">
+        <div class="badge">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            {% if r.is_no %}<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>
+            {% else %}<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>{% endif %}
+          </svg>
+        </div>
+        <div>
+          <p class="outcome">{% if r.is_no %}Sans traitement antidiabétique{% else %}Sous traitement antidiabétique{% endif %}</p>
+          <p class="code">diabetesMed = {% if r.is_no %}No{% else %}Yes{% endif %}</p>
+        </div>
+      </div>
+
+      <div class="gauge-wrap">
+        <div class="gauge" role="img"
+             aria-label="Probabilité sans traitement : {{ fr(r.p_no) }} %, seuil de décision : {{ fr(r.seuil) }} %"
+             style="--w: {{ r.p_no }}; --s: {{ r.seuil }}">
+          <div class="gauge-fill"></div>
+          <div class="gauge-mark"><span>Seuil {{ fr(r.seuil) }} %</span></div>
+        </div>
+        <div class="gauge-scale"><span>0 %</span><span>100 %</span></div>
+      </div>
+
+      <dl class="figures">
+        <div class="f-no"><dt>Probabilité « sans traitement »</dt><dd>{{ fr(r.p_no) }} %</dd></div>
+        <div class="f-yes"><dt>Probabilité « sous traitement »</dt><dd>{{ fr(r.p_yes) }} %</dd></div>
+      </dl>
+
+      <p class="explain">La probabilité « sans traitement » {% if r.is_no %}atteint{% else %}n'atteint pas{% endif %}
+        le seuil de décision de {{ fr(r.seuil) }} %. Le patient est donc classé
+        « {% if r.is_no %}sans traitement{% else %}sous traitement{% endif %} ».</p>
+    </section>
+
+    {% if r.metrics %}
+    <section class="perf">
+      <h2>Fiabilité du modèle</h2>
+      <p class="desc">Mesurée sur le jeu de test, pour la classe « sans traitement ».</p>
+      <dl class="metrics">
+        {% for k, v in r.metrics.items() %}
+        {% set col = mcolors[loop.index0 % 3] %}
+        <div style="--accent: {{ col[0] }}; --tint: {{ col[1] }}"><dt>{{ k }}</dt><dd>{{ fr(v) }}</dd></div>
+        {% endfor %}
+      </dl>
+    </section>
+    {% endif %}
+
+    <div class="actions">
+      <p class="note">Démonstration pédagogique : ce modèle est modeste et ne constitue pas un avis médical.</p>
+      <a class="btn" href="{{ url_for(request.blueprint ~ '.form') }}">Saisir un autre patient</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

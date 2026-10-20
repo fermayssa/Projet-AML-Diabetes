@@ -1,25 +1,102 @@
 {% extends "base.html" %}
+{% block title %}Modèles disponibles - Projet AML{% endblock %}
+
 {% block content %}
-<h1>Modèles disponibles</h1>
-<p>Chaque membre du groupe a son propre module.</p>
+<style>
+.home{--ink:#1b2733;--muted:#5b6b7b;--line:#dbe3ec;
+  font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink)}
 
-{% if modules %}
-<div class="cards">
-  {% for m in modules %}
-  <a class="card" href="{{ m.url }}/">
-    <h2>{{ m.title }}</h2>
-    <p>{{ m.description }}</p>
-  </a>
-  {% endfor %}
-</div>
-{% else %}
-<p>Aucun module pour le moment.</p>
-{% endif %}
+/* bandeau d'en-tête */
+.home .hero{background:linear-gradient(120deg,#1f4e79 0%,#27688f 55%,#1c7c80 100%);color:#fff;border-radius:12px;
+  padding:30px 28px 26px;margin:4px 0 26px}
+.home .hero h1{font-size:32px;line-height:1.15;letter-spacing:-.015em;margin:0 0 10px;font-weight:700;color:#fff}
+.home .hero p{margin:0;max-width:60ch;line-height:1.5;color:#e3eef7}
+.home .count{display:inline-block;margin-top:18px;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.34)}
 
-{% if failed %}
-<div class="warn">
-  <h3>Modules en erreur</h3>
-  <ul>{% for f in failed %}<li><b>{{ f.name }}</b> : {{ f.error }}</li>{% endfor %}</ul>
+/* cartes des modules : une couleur par module */
+.home .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.home .card{--accent:#1f4e79;--tint:#e6eef6;display:flex;flex-direction:column;gap:6px;padding:26px 22px 18px;
+  position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:12px;
+  color:inherit;text-decoration:none}
+.home .card::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--accent)}
+.home .card:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(27,39,51,.10)}
+.home .card:focus-visible{outline:3px solid var(--tint);outline-offset:2px;border-color:var(--accent)}
+.home .badge{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:13px;
+  background:var(--tint);color:var(--accent);margin-bottom:8px}
+.home .card h2{margin:0;font-size:18px;line-height:1.25;font-weight:700;color:var(--accent)}
+.home .card p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.5;flex:1}
+.home .open{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:14px;font-weight:600;
+  color:var(--accent);display:flex;align-items:center;justify-content:space-between}
+
+/* aucun module */
+.home .empty{background:#fff;border:1px dashed #b9c5d1;border-radius:12px;padding:28px;color:var(--muted);line-height:1.5}
+.home .empty b{color:var(--ink)}
+
+/* modules en erreur */
+.home .failed{margin-top:28px;background:#fff;border:1px solid #ecd9a8;border-left:5px solid #b7791f;border-radius:10px;
+  padding:14px 18px;color:#5c4311}
+.home .failed h3{margin:0 0 8px;font-size:15px}
+.home .failed ul{margin:0;padding-left:18px;line-height:1.5;font-size:14px}
+
+@media (max-width:520px){
+  .home .hero{padding:22px 18px}
+  .home .hero h1{font-size:26px}
+}
+</style>
+
+{# couleurs et icônes attribuées à tour de rôle : (couleur, fond clair, icône) #}
+{% set palette = [
+  ("#1f4e79", "#e6eef6", "chart"), ("#0f766e", "#e0f2ef", "layers"), ("#b45309", "#fcefdc", "pulse"),
+  ("#6d4aa3", "#eee9f7", "target"), ("#b4234a", "#fbe6ec", "grid"),
+] %}
+
+<div class="home">
+  <div class="hero">
+    <h1>Modèles disponibles</h1>
+    <p>Choisissez un modèle pour saisir les données d'un patient et obtenir une prédiction. Chaque membre du groupe
+      a son propre module.</p>
+    {% if modules %}<span class="count">{{ modules|length }} modèle{{ "s" if modules|length > 1 }}
+      disponible{{ "s" if modules|length > 1 }}</span>{% endif %}
+  </div>
+
+  {% if modules %}
+  <div class="cards">
+    {% for m in modules %}
+    {% set p = palette[loop.index0 % 5] %}
+    <a class="card" href="{{ m.url }}/" style="--accent: {{ p[0] }}; --tint: {{ p[1] }}">
+      <div class="badge">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          {% if p[2] == "chart" %}<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>
+          {% elif p[2] == "layers" %}<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>
+          {% elif p[2] == "pulse" %}<path d="M3 12h4l3-8 4 16 3-8h4"/>
+          {% elif p[2] == "target" %}<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>
+          {% else %}<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>
+          {% endif %}
+        </svg>
+      </div>
+      <h2>{{ m.title }}</h2>
+      <p>{{ m.description }}</p>
+      <div class="open"><span>Ouvrir le module</span>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <b>Aucun module pour le moment.</b><br>
+    Ajoutez un dossier dans <code>modules/</code> (sans « _ » au début) : il apparaîtra ici automatiquement.
+  </div>
+  {% endif %}
+
+  {% if failed %}
+  <div class="failed" role="alert">
+    <h3>Modules en erreur</h3>
+    <ul>{% for f in failed %}<li><b>{{ f.name }}</b> : {{ f.error }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
 </div>
-{% endif %}
 {% endblock %}
