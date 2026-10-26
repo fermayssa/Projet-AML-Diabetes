@@ -1,7 +1,7 @@
 {
   "modele": "XGBoost",
   "classe_positive": "No (sans traitement diabetesMed)",
-  "seuil": 0.6529248952865601,
+  "seuil": 0.653,
   "columns": [
     "age",
     "time_in_hospital",
@@ -89,10 +89,6 @@
     "A1Cresult"
   ],
   "bornes": {
-    "age": [
-      5.0,
-      95.0
-    ],
     "time_in_hospital": [
       1.0,
       14.0
@@ -115,27 +111,31 @@
     ],
     "number_emergency": [
       0.0,
-      37.0
+      76.0
     ],
     "number_inpatient": [
       0.0,
-      12.0
+      21.0
     ],
     "number_diagnoses": [
       1.0,
       16.0
+    ],
+    "age": [
+      5.0,
+      95.0
     ]
   },
   "defaults": {
-    "age": 65.0,
-    "time_in_hospital": 3.0,
+    "time_in_hospital": 4.0,
     "num_lab_procedures": 44.0,
     "num_procedures": 1.0,
-    "num_medications": 14.0,
+    "num_medications": 15.0,
     "number_outpatient": 0.0,
     "number_emergency": 0.0,
     "number_inpatient": 0.0,
-    "number_diagnoses": 8.0
+    "number_diagnoses": 8.0,
+    "age": 65.0
   },
   "categories": {
     "race": [
@@ -224,16 +224,13 @@
     "max_glu_serum": "Non mesure",
     "A1Cresult": "Non mesure"
   },
-  "dummies_dtype": "bool",
+  "dummies_dtype": "int8",
   "metriques_test": {
     "Précision (No)": 0.485,
     "Rappel (No)": 0.294,
     "F1 (No)": 0.366
   },
   "versions": {
-    "sklearn": "1.8.0",
-    "pandas": "3.0.2",
-    "numpy": "2.4.4",
-    "xgboost": "3.4.1"
+    "sklearn": "1.8.0"
   }
 }

@@ -155,13 +155,27 @@ def add_user():
     if 'user' not in session or session['user']['role'] != 'admin':
         return redirect(url_for('login'))
     
-    username = request.form.get('username')
-    password = request.form.get('password')
-    email = request.form.get('email')
-    role = request.form.get('role')
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
+    email = request.form.get('email', '').strip()
+    role = request.form.get('role', '')
     
-    if not username or not password or not role:
-        return 'Champs manquants', 400
+    # Validations côté serveur
+    if not username or len(username) < 3 or len(username) > 30:
+        flash('Le username doit contenir entre 3 et 30 caractères', 'error')
+        return redirect(url_for('users_list'))
+    
+    if not password or len(password) < 8:
+        flash('Le mot de passe doit contenir au moins 8 caractères', 'error')
+        return redirect(url_for('users_list'))
+    
+    if email and not ('@' in email and '.' in email):
+        flash('Format d\'email invalide', 'error')
+        return redirect(url_for('users_list'))
+    
+    if role not in ['admin', 'medecin', 'infirmier', 'gestionnaire']:
+        flash('Rôle invalide', 'error')
+        return redirect(url_for('users_list'))
     
     import bcrypt
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -171,12 +185,12 @@ def add_user():
         with conn.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO users (username, password_hash, email, role) VALUES (%s, %s, %s, %s)",
-                (username, password_hash, email, role)
+                (username, password_hash, email if email else None, role)
             )
         conn.commit()
     except Exception as e:
         conn.rollback()
-        return str(e), 400
+        flash(f'Erreur lors de l\'ajout: {e}', 'error')
     finally:
         conn.close()
     

@@ -15,17 +15,17 @@
       <div class="form-row">
         <div class="form-group">
           <label for="nom">Nom *</label>
-          <input type="text" id="nom" name="nom" required value="{{ patient.nom or '' }}">
+          <input type="text" id="nom" name="nom" required pattern="^[a-zA-ZÀ-ÿ\s-]{2,50}$" value="{{ patient.nom or '' }}" title="Le nom doit contenir entre 2 et 50 caractères (lettres, espaces et tirets uniquement)">
         </div>
         <div class="form-group">
           <label for="prenom">Prénom *</label>
-          <input type="text" id="prenom" name="prenom" required value="{{ patient.prenom or '' }}">
+          <input type="text" id="prenom" name="prenom" required pattern="^[a-zA-ZÀ-ÿ\s-]{2,50}$" value="{{ patient.prenom or '' }}" title="Le prénom doit contenir entre 2 et 50 caractères (lettres, espaces et tirets uniquement)">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="age">Âge *</label>
-          <input type="number" id="age" name="age" required value="{{ patient.age or '' }}">
+          <input type="number" id="age" name="age" required min="0" max="120" value="{{ patient.age or '' }}" title="L'âge doit être entre 0 et 120 ans">
         </div>
         <div class="form-group">
           <label for="sexe">Sexe *</label>
@@ -48,16 +48,16 @@
       <div class="form-row">
         <div class="form-group">
           <label for="telephone">Téléphone</label>
-          <input type="tel" id="telephone" name="telephone" value="{{ patient.telephone or '' }}" placeholder="0612345678">
+          <input type="tel" id="telephone" name="telephone" pattern="^[0-9]{10}$" value="{{ patient.telephone or '' }}" placeholder="0612345678" title="Le téléphone doit contenir exactement 10 chiffres">
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" value="{{ patient.email or '' }}" placeholder="email@exemple.com">
+          <input type="email" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" value="{{ patient.email or '' }}" placeholder="email@exemple.com" title="Format d'email invalide">
         </div>
       </div>
       <div class="form-group">
         <label for="adresse">Adresse</label>
-        <textarea id="adresse" name="adresse" rows="3" placeholder="Adresse complète...">{{ patient.adresse or '' }}</textarea>
+        <textarea id="adresse" name="adresse" rows="3" maxlength="500" placeholder="Adresse complète...">{{ patient.adresse or '' }}</textarea>
       </div>
     </div>
 
@@ -82,16 +82,16 @@
       <div class="form-row">
         <div class="form-group">
           <label for="hba1c">HbA1c (%)</label>
-          <input type="number" step="0.1" id="hba1c" name="hba1c" value="{{ patient.hba1c or '' }}">
+          <input type="number" step="0.1" id="hba1c" name="hba1c" min="3" max="15" value="{{ patient.hba1c or '' }}" title="L'HbA1c doit être entre 3 et 15%">
         </div>
         <div class="form-group">
           <label for="glycemie">Glycémie (g/L)</label>
-          <input type="number" step="0.01" id="glycemie" name="glycemie" value="{{ patient.glycemie or '' }}">
+          <input type="number" step="0.01" id="glycemie" name="glycemie" min="0.5" max="5" value="{{ patient.glycemie or '' }}" title="La glycémie doit être entre 0.5 et 5 g/L">
         </div>
       </div>
       <div class="form-group">
         <label for="traitement">Traitement</label>
-        <textarea id="traitement" name="traitement" rows="3" placeholder="Médicaments et dosages...">{{ patient.traitement or '' }}</textarea>
+        <textarea id="traitement" name="traitement" rows="3" maxlength="2000" placeholder="Médicaments et dosages...">{{ patient.traitement or '' }}</textarea>
       </div>
     </div>
 

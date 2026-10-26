@@ -5,28 +5,6 @@
 {% block content %}
 <div class="page-header">
   <h1><i class="fas fa-clock"></i> Prévision de la Durée de Séjour</h1>
-  <div class="patient-selector">
-    <select id="patientSelect" onchange="changePatient()">
-      {% for p in patients %}
-      <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
-        {{ p.prenom }} {{ p.nom }} ({{ p.age }} ans)
-      </option>
-      {% endfor %}
-    </select>
-  </div>
-</div>
-
-<!-- Patient Info -->
-<div class="patient-info-card">
-  <div class="patient-header-mini">
-    <div class="patient-avatar-small">
-      <i class="fas fa-user"></i>
-    </div>
-    <div>
-      <h3>{{ patient.prenom }} {{ patient.nom }}</h3>
-      <p class="patient-meta-mini">{{ patient.age }} ans • {{ patient.admission_type }}</p>
-    </div>
-  </div>
 </div>
 
 <!-- Résultat de prédiction -->
@@ -195,10 +173,4 @@
   </a>
 </div>
 
-<script>
-function changePatient() {
-  const patientId = document.getElementById('patientSelect').value;
-  window.location.href = `{{ url_for('decision_support.duree_sejour') }}?patient_id=${patientId}`;
-}
-</script>
 {% endblock %}

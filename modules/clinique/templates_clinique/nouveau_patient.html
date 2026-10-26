@@ -15,11 +15,11 @@
       <div class="form-row">
         <div class="form-group">
           <label for="nom">Nom *</label>
-          <input type="text" id="nom" name="nom" required>
+          <input type="text" id="nom" name="nom" required pattern="^[a-zA-ZÀ-ÿ\s-]{2,50}$" title="Le nom doit contenir entre 2 et 50 caractères (lettres, espaces et tirets uniquement)">
         </div>
         <div class="form-group">
           <label for="prenom">Prénom *</label>
-          <input type="text" id="prenom" name="prenom" required>
+          <input type="text" id="prenom" name="prenom" required pattern="^[a-zA-ZÀ-ÿ\s-]{2,50}$" title="Le prénom doit contenir entre 2 et 50 caractères (lettres, espaces et tirets uniquement)">
         </div>
       </div>
       <div class="form-row">
@@ -44,16 +44,16 @@
       <div class="form-row">
         <div class="form-group">
           <label for="telephone">Téléphone *</label>
-          <input type="tel" id="telephone" name="telephone" required placeholder="0612345678">
+          <input type="tel" id="telephone" name="telephone" required pattern="^[0-9]{10}$" placeholder="0612345678" title="Le téléphone doit contenir exactement 10 chiffres">
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="email@exemple.com">
+          <input type="email" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" placeholder="email@exemple.com" title="Format d'email invalide">
         </div>
       </div>
       <div class="form-group">
         <label for="adresse">Adresse</label>
-        <textarea id="adresse" name="adresse" rows="3" placeholder="Adresse complète..."></textarea>
+        <textarea id="adresse" name="adresse" rows="3" maxlength="500" placeholder="Adresse complète..."></textarea>
       </div>
     </div>
 
@@ -75,7 +75,7 @@
       </div>
       <div class="form-group">
         <label for="antecedents">Antécédents médicaux</label>
-        <textarea id="antecedents" name="antecedents" rows="3" placeholder="Allergies, maladies chroniques, interventions chirurgicales..."></textarea>
+        <textarea id="antecedents" name="antecedents" rows="3" maxlength="2000" placeholder="Allergies, maladies chroniques, interventions chirurgicales..."></textarea>
       </div>
     </div>
 

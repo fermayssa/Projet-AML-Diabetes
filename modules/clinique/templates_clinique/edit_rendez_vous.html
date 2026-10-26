@@ -28,7 +28,7 @@
         </div>
         <div class="form-group">
           <label for="duree">Durée (minutes)</label>
-          <input type="number" id="duree" name="duree" value="{{ rdv.duree or 30 }}" min="15" step="15">
+          <input type="number" id="duree" name="duree" value="{{ rdv.duree or 30 }}" min="15" max="180" step="15" title="La durée doit être entre 15 et 180 minutes, par tranches de 15">
         </div>
       </div>
       <div class="form-row">
@@ -60,11 +60,11 @@
       <h2>Détails</h2>
       <div class="form-group">
         <label for="motif">Motif de consultation</label>
-        <textarea id="motif" name="motif" rows="3" placeholder="Décrivez le motif de la consultation...">{{ rdv.motif or '' }}</textarea>
+        <textarea id="motif" name="motif" rows="3" maxlength="500" placeholder="Décrivez le motif de la consultation...">{{ rdv.motif or '' }}</textarea>
       </div>
       <div class="form-group">
         <label for="notes">Notes additionnelles</label>
-        <textarea id="notes" name="notes" rows="2" placeholder="Informations complémentaires...">{{ rdv.notes or '' }}</textarea>
+        <textarea id="notes" name="notes" rows="2" maxlength="500" placeholder="Informations complémentaires...">{{ rdv.notes or '' }}</textarea>
       </div>
     </div>
 

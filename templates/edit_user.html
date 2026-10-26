@@ -19,7 +19,7 @@
       </div>
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" value="{{ user.email or '' }}">
+        <input type="email" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" value="{{ user.email or '' }}" title="Format d'email invalide">
       </div>
       <div class="form-group">
         <label for="role">Rôle *</label>
@@ -32,7 +32,7 @@
       </div>
       <div class="form-group">
         <label for="password">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
-        <input type="password" id="password" name="password" placeholder="Laisser vide pour garder le mot de passe actuel">
+        <input type="password" id="password" name="password" minlength="8" placeholder="Laisser vide pour garder le mot de passe actuel" title="Le mot de passe doit contenir au moins 8 caractères">
       </div>
     </div>
 

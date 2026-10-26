@@ -19,15 +19,15 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="nom">Nom *</label>
-          <input type="text" id="nom" name="nom" required>
+          <input type="text" id="nom" name="nom" required pattern="^[a-zA-ZÀ-ÿ\s-]{2,50}$" title="Le nom doit contenir entre 2 et 50 caractères (lettres, espaces et tirets uniquement)">
         </div>
         <div class="form-group">
           <label for="prenom">Prénom *</label>
-          <input type="text" id="prenom" name="prenom" required>
+          <input type="text" id="prenom" name="prenom" required pattern="^[a-zA-ZÀ-ÿ\s-]{2,50}$" title="Le prénom doit contenir entre 2 et 50 caractères (lettres, espaces et tirets uniquement)">
         </div>
         <div class="form-group">
           <label for="age">Âge *</label>
-          <input type="number" id="age" name="age" required>
+          <input type="number" id="age" name="age" required min="0" max="120" title="L'âge doit être entre 0 et 120 ans">
         </div>
         <div class="form-group">
           <label for="sexe">Sexe *</label>
@@ -39,11 +39,11 @@
         </div>
         <div class="form-group">
           <label for="telephone">Téléphone</label>
-          <input type="tel" id="telephone" name="telephone">
+          <input type="tel" id="telephone" name="telephone" pattern="^[0-9]{10}$" title="Le téléphone doit contenir exactement 10 chiffres">
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email">
+          <input type="email" id="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Format d'email invalide">
         </div>
         <div class="form-group">
           <label for="adresse">Adresse</label>

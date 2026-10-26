@@ -92,6 +92,40 @@ def nouveau_rendez_vous():
 @bp.route('/patients/add', methods=['POST'])
 def add_patient():
     """Ajouter un nouveau patient"""
+    nom = request.form.get('nom', '').strip()
+    prenom = request.form.get('prenom', '').strip()
+    age = request.form.get('age')
+    sexe = request.form.get('sexe')
+    telephone = request.form.get('telephone', '').strip()
+    email = request.form.get('email', '').strip()
+    adresse = request.form.get('adresse', '').strip()
+    diabetes_type = request.form.get('diabetes_type')
+    
+    # Validations côté serveur
+    if not nom or len(nom) < 2 or len(nom) > 50:
+        flash('Le nom doit contenir entre 2 et 50 caractères', 'error')
+        return redirect(url_for('clinique.patients'))
+    
+    if not prenom or len(prenom) < 2 or len(prenom) > 50:
+        flash('Le prénom doit contenir entre 2 et 50 caractères', 'error')
+        return redirect(url_for('clinique.patients'))
+    
+    if not age or not age.isdigit() or int(age) < 0 or int(age) > 120:
+        flash('L\'âge doit être entre 0 et 120', 'error')
+        return redirect(url_for('clinique.patients'))
+    
+    if sexe not in ['M', 'F']:
+        flash('Sexe invalide', 'error')
+        return redirect(url_for('clinique.patients'))
+    
+    if telephone and (not telephone.isdigit() or len(telephone) != 10):
+        flash('Le téléphone doit contenir exactement 10 chiffres', 'error')
+        return redirect(url_for('clinique.patients'))
+    
+    if email and not ('@' in email and '.' in email):
+        flash('Format d\'email invalide', 'error')
+        return redirect(url_for('clinique.patients'))
+    
     conn = db_config.get_db_connection()
     try:
         with conn.cursor() as cursor:
@@ -100,14 +134,11 @@ def add_patient():
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(sql, (
-                request.form.get('nom'),
-                request.form.get('prenom'),
-                request.form.get('age'),
-                request.form.get('sexe'),
-                request.form.get('telephone'),
-                request.form.get('email'),
-                request.form.get('adresse'),
-                request.form.get('diabetes_type')
+                nom, prenom, int(age), sexe,
+                telephone if telephone else None,
+                email if email else None,
+                adresse if adresse else None,
+                diabetes_type
             ))
         conn.commit()
         flash('Patient ajouté avec succès!', 'success')
@@ -125,6 +156,64 @@ def edit_patient(patient_id):
     conn = db_config.get_db_connection()
     try:
         if request.method == 'POST':
+            nom = request.form.get('nom', '').strip()
+            prenom = request.form.get('prenom', '').strip()
+            age = request.form.get('age')
+            sexe = request.form.get('sexe')
+            telephone = request.form.get('telephone', '').strip()
+            email = request.form.get('email', '').strip()
+            adresse = request.form.get('adresse', '').strip()
+            diabetes_type = request.form.get('diabetes_type')
+            date_naissance = request.form.get('date_naissance')
+            hba1c = request.form.get('hba1c')
+            glycemie = request.form.get('glycemie')
+            traitement = request.form.get('traitement', '').strip()
+            
+            # Validations côté serveur
+            if not nom or len(nom) < 2 or len(nom) > 50:
+                flash('Le nom doit contenir entre 2 et 50 caractères', 'error')
+                return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if not prenom or len(prenom) < 2 or len(prenom) > 50:
+                flash('Le prénom doit contenir entre 2 et 50 caractères', 'error')
+                return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if not age or not age.isdigit() or int(age) < 0 or int(age) > 120:
+                flash('L\'âge doit être entre 0 et 120', 'error')
+                return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if sexe not in ['M', 'F', 'A']:
+                flash('Sexe invalide', 'error')
+                return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if telephone and (not telephone.isdigit() or len(telephone) != 10):
+                flash('Le téléphone doit contenir exactement 10 chiffres', 'error')
+                return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if email and not ('@' in email and '.' in email):
+                flash('Format d\'email invalide', 'error')
+                return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if hba1c:
+                try:
+                    hba1c_float = float(hba1c)
+                    if hba1c_float < 3 or hba1c_float > 15:
+                        flash('L\'HbA1c doit être entre 3 et 15%', 'error')
+                        return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+                except ValueError:
+                    flash('L\'HbA1c doit être un nombre', 'error')
+                    return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
+            if glycemie:
+                try:
+                    glycemie_float = float(glycemie)
+                    if glycemie_float < 0.5 or glycemie_float > 5:
+                        flash('La glycémie doit être entre 0.5 et 5 g/L', 'error')
+                        return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+                except ValueError:
+                    flash('La glycémie doit être un nombre', 'error')
+                    return redirect(url_for('clinique.edit_patient', patient_id=patient_id))
+            
             with conn.cursor() as cursor:
                 sql = """
                     UPDATE patients SET
@@ -135,18 +224,15 @@ def edit_patient(patient_id):
                     WHERE id = %s
                 """
                 cursor.execute(sql, (
-                    request.form.get('nom'),
-                    request.form.get('prenom'),
-                    request.form.get('age'),
-                    request.form.get('sexe'),
-                    request.form.get('telephone'),
-                    request.form.get('email'),
-                    request.form.get('adresse'),
-                    request.form.get('diabetes_type'),
-                    request.form.get('date_naissance'),
-                    request.form.get('hba1c'),
-                    request.form.get('glycemie'),
-                    request.form.get('traitement'),
+                    nom, prenom, int(age), sexe,
+                    telephone if telephone else None,
+                    email if email else None,
+                    adresse if adresse else None,
+                    diabetes_type,
+                    date_naissance if date_naissance else None,
+                    float(hba1c) if hba1c else None,
+                    float(glycemie) if glycemie else None,
+                    traitement if traitement else None,
                     patient_id
                 ))
             conn.commit()

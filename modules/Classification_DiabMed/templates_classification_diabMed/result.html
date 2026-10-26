@@ -8,25 +8,27 @@
     
     {% if prediction_result %}
     <div class="prediction-result-section">
-        <div class="prediction-main {% if prediction_result.needs_treatment %}prediction-high{% else %}prediction-low{% endif %}">
+        <div class="prediction-main {% if not prediction_result.needs_treatment %}prediction-success{% else %}prediction-warning{% endif %}">
             <div class="prediction-status-large">
-                <div class="status-icon-large {% if not prediction_result.needs_treatment %}status-yes{% else %}status-no{% endif %}">
-                    <i class="fas {% if not prediction_result.needs_treatment %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                <div class="status-icon-large {% if not prediction_result.needs_treatment %}status-success{% else %}status-warning{% endif %}">
+                    <i class="fas {% if not prediction_result.needs_treatment %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
                 </div>
                 <div class="prediction-verdict">
                     <h4>Statut du Traitement Antidiabétique</h4>
-                    <div class="verdict-badge {% if not prediction_result.needs_treatment %}verdict-yes{% else %}verdict-no{% endif %}">
+                    <div class="verdict-badge {% if not prediction_result.needs_treatment %}verdict-success{% else %}verdict-warning{% endif %}">
                         {% if prediction_result.needs_treatment %}
                         <i class="fas fa-exclamation-triangle"></i> {{ prediction_result.label }}
                         {% else %}
-                        <i class="fas fa-check"></i> {{ prediction_result.label }}
+                        <i class="fas fa-check-circle"></i> {{ prediction_result.label }}
                         {% endif %}
                     </div>
                     <div class="prediction-details">
-                        <p><strong>Modèle:</strong> {{ prediction_result.model_type }}</p>
-                        <p><strong>Probabilité (sans traitement):</strong> {{ prediction_result.p_no }}%</p>
-                        <p><strong>Probabilité (avec traitement):</strong> {{ prediction_result.p_yes }}%</p>
+                        <p><strong>Probabilité sans traitement:</strong> {{ prediction_result.p_no }}%</p>
                         <p><strong>Seuil de décision:</strong> {{ prediction_result.seuil }}%</p>
+                        <p><strong>Modèle:</strong> {{ prediction_result.model_type }}</p>
+                    </div>
+                    <div class="prediction-warning-text">
+                        <p><em>Estimation du modèle, à valider par un clinicien</em></p>
                     </div>
                 </div>
             </div>
