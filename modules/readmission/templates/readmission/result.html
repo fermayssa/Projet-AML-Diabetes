@@ -1,6 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Résultat : {{ r.info.label }}</h1>
+
+<style>
+  .rx-card { background:#fff; border:1px solid #d8e0ea; border-left:6px solid #1f4e79;
+             border-radius:8px; padding:14px 18px; margin:14px 0; }
+  .rx-card p { margin:6px 0 0; }
+  .rx-high   { border-left-color:#c0392b; background:#fdecea; }
+  .rx-medium { border-left-color:#e6a100; background:#fff8e1; }
+  .rx-low    { border-left-color:#2e8b57; background:#eaf7ef; }
+  .rx-table { border-collapse:collapse; background:#fff; margin:10px 0 20px; }
+  .rx-table th, .rx-table td { border:1px solid #d8e0ea; padding:10px 14px; text-align:left; }
+  .rx-note { color:#555; font-size:13px; }
+  .rx-reco { background:#fff; border:1px solid #d8e0ea; border-top:5px solid #1f4e79;
+             border-radius:8px; padding:6px 20px 14px; margin:10px 0 20px; }
+  .rx-reco h4 { margin:14px 0 6px; color:#1f4e79; }
+  .rx-reco ul { margin:0; padding-left:20px; }
+  .rx-reco li { margin-bottom:6px; }
+  .rx-reco.rx-high   { border-top-color:#c0392b; background:#fff; }
+  .rx-reco.rx-medium { border-top-color:#e6a100; background:#fff; }
+  .rx-reco.rx-low    { border-top-color:#2e8b57; background:#fff; }
+</style>
+
+{# ---------- 1) Niveau de risque ---------- #}
+{% set p30 = r.p30_pct|float %}
+{% set seuil = r.seuil_pct|float %}
+{% if r.alerte %}
+  {% set niv = 'rx-high' %}
+  {% set titre = 'Risque élevé de retour rapide' %}
+  {% set resume = 'Ce patient fait partie des profils les plus à risque de revenir à l\'hôpital dans les 30 jours suivant sa sortie. Un suivi renforcé est conseillé.' %}
+{% elif p30 >= 0.6 * seuil %}
+  {% set niv = 'rx-medium' %}
+  {% set titre = 'Risque modéré de retour rapide' %}
+  {% set resume = 'Le risque de retour rapide est proche du seuil d\'alerte. Un suivi un peu plus attentif qu\'à l\'ordinaire est conseillé.' %}
+{% else %}
+  {% set niv = 'rx-low' %}
+  {% set titre = 'Risque faible de retour rapide' %}
+  {% set resume = 'Le modèle ne repère pas de signal fort de retour rapide. Le parcours standard reste adapté.' %}
+{% endif %}
+
+{# ---------- 2) Facteurs de vigilance (valeurs saisies dans le formulaire) ---------- #}
+{% set f = request.form %}
+{% set facteurs = [] %}
+{% set n = f.get('number_inpatient', 0)|int %}
+{% if n >= 1 %}{% set _ = facteurs.append({'force':'fort','nom':'Hospitalisations antérieures','detail': n ~ ' hospitalisation(s) dans l\'année précédente','action':'Revoir les causes des hospitalisations précédentes avant la sortie.'}) %}{% endif %}
+{% set n = f.get('number_emergency', 0)|int %}
+{% if n >= 1 %}{% set _ = facteurs.append({'force':'fort','nom':'Passages aux urgences','detail': n ~ ' passage(s) aux urgences récemment','action':'Identifier ce qui a motivé les passages aux urgences et le traiter en amont.'}) %}{% endif %}
+{% set n = f.get('time_in_hospital', 0)|int %}
+{% if n >= 7 %}{% set _ = facteurs.append({'force':'modere','nom':'Séjour long','detail': n ~ ' jours d\'hospitalisation','action':'Prévoir une sortie progressive et un suivi renforcé.'}) %}{% endif %}
+{% set n = f.get('number_diagnoses', 0)|int %}
+{% if n >= 7 %}{% set _ = facteurs.append({'force':'modere','nom':'Nombreux diagnostics','detail': n ~ ' diagnostics associés','action':'Coordonner les spécialistes et clarifier un plan de soins unique.'}) %}{% endif %}
+{% set n = f.get('num_medications', 0)|int %}
+{% if n >= 15 %}{% set _ = facteurs.append({'force':'modere','nom':'Traitement lourd','detail': n ~ ' médicaments','action':'Faire une revue de médication pour limiter les interactions et les oublis.'}) %}{% endif %}
+{% if f.get('A1Cresult', '') in ['>7', '>8'] %}{% set _ = facteurs.append({'force':'modere','nom':'Diabète mal équilibré','detail':'HbA1c ' ~ f.get('A1Cresult'),'action':'Ajuster le traitement et planifier un contrôle de l\'HbA1c.'}) %}{% endif %}
+{% if f.get('insulin', '') in ['Up', 'Down'] %}{% set _ = facteurs.append({'force':'modere','nom':'Insuline modifiée pendant le séjour','detail':'Dose d\'insuline : ' ~ f.get('insulin'),'action':'Vérifier que le patient maîtrise sa nouvelle dose (éducation à l\'insuline).'}) %}{% endif %}
+
+<h1>{{ titre }}</h1>
 
 {% if r.alerte %}
 <div class="warn">
@@ -9,17 +63,28 @@
 </div>
 {% endif %}
 
-<div class="card">
-  <h2>Catégorie la plus probable : {{ r.info.name }}</h2>
-  <p><b>Action suggérée :</b> {{ r.info.action }}</p>
+<div class="rx-card {{ niv }}">
+  <b>Synthèse pour le médecin</b>
+  <p>{{ resume }} Probabilité de retour sous 30 jours : {{ r.p30_pct }} %
+     (moyenne de la population : {{ r.stats.base_rate_pct }} %).</p>
 </div>
 
-<h3>Probabilité de chaque catégorie</h3>
-<table>
-  <tr><th>Catégorie</th><th>Sens</th><th>Probabilité</th></tr>
+{# ---------- 3) Probabilités en langage clair ---------- #}
+<h3>Ce que prévoit le modèle</h3>
+<table class="rx-table">
+  <tr><th>Scénario</th><th>Signification</th><th>Probabilité</th></tr>
   {% for p in r.probas %}
   <tr {% if p.best %}style="font-weight:bold"{% endif %}>
-    <td>{{ p.name }}</td><td>{{ p.label }}</td>
+    <td>
+      {% if p.name == '<30' %}Retour dans les 30 jours
+      {% elif p.name == '>30' %}Retour après 30 jours
+      {% else %}Pas de retour{% endif %}
+    </td>
+    <td>
+      {% if p.name == '<30' %}Le patient revient rapidement : c'est le cas à anticiper.
+      {% elif p.name == '>30' %}Le patient revient plus tard : moins urgent, mais le suivi reste utile.
+      {% else %}Le patient ne revient pas.{% endif %}
+    </td>
     <td>{{ p.pct }} %
       <div style="background:#d0dcea;width:160px;height:8px;border-radius:4px;display:inline-block;vertical-align:middle;margin-left:8px">
         <div style="background:#1f4e79;width:{{ p.pct }}%;height:8px;border-radius:4px"></div>
@@ -28,17 +93,79 @@
   {% endfor %}
 </table>
 
+{# ---------- 4) Pourquoi ce patient pourrait revenir ---------- #}
+<h3>Pourquoi ce patient pourrait revenir</h3>
+{% if facteurs %}
+  <p class="rx-note">Facteurs de vigilance repérés dans les données saisies :</p>
+  {% for x in facteurs %}
+  <div class="rx-card {{ 'rx-high' if x.force == 'fort' else 'rx-medium' }}">
+    <b>{{ x.nom }} ({{ 'impact fort' if x.force == 'fort' else 'impact modéré' }})</b>
+    <p>{{ x.detail }}</p>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Aucun facteur de vigilance simple repéré dans les données saisies. Le modèle combine de nombreuses variables pour établir ce résultat.</p>
+{% endif %}
+<p class="rx-note">Ces facteurs sont associés à un risque plus élevé de retour. Ils ne prouvent pas la cause du retour du patient.</p>
+
+{# ---------- 5) Recommandations ---------- #}
+<h3>Recommandations</h3>
+<div class="rx-reco {{ niv }}">
+  {% if niv == 'rx-high' %}
+    <h4>Avant la sortie</h4>
+    <ul>
+      <li>Faire valider la sortie par le médecin référent.</li>
+      <li>Réaliser une revue complète des médicaments (doses, interactions).</li>
+      <li>Vérifier que le patient et son entourage comprennent le traitement.</li>
+    </ul>
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Remettre un plan de soins écrit et un numéro à appeler en cas de problème.</li>
+      <li>Programmer le rendez-vous de contrôle avant le départ du patient.</li>
+      <li>Proposer une éducation thérapeutique renforcée (glycémie, insuline, alimentation).</li>
+    </ul>
+    <h4>Après la sortie</h4>
+    <ul>
+      <li>Appeler le patient dans les 48 à 72 h.</li>
+      <li>Consultation de suivi dans les 7 jours.</li>
+      <li>Surveiller la glycémie et ajuster le traitement si besoin.</li>
+    </ul>
+  {% elif niv == 'rx-medium' %}
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Remettre un plan de soins écrit et vérifier la compréhension du traitement.</li>
+      <li>Programmer un rendez-vous de contrôle dans les 2 semaines.</li>
+    </ul>
+    <h4>Après la sortie</h4>
+    <ul>
+      <li>Appel de suivi dans la semaine.</li>
+      <li>Éducation thérapeutique de base, avec rappel des signes d'alerte.</li>
+    </ul>
+  {% else %}
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Parcours standard avec éducation thérapeutique de base.</li>
+      <li>Rendez-vous de suivi habituel avec le médecin traitant.</li>
+    </ul>
+  {% endif %}
+
+  {% if facteurs %}
+    <h4>Actions ciblées sur ce patient</h4>
+    <ul>{% for x in facteurs %}<li>{{ x.action }}</li>{% endfor %}</ul>
+  {% endif %}
+</div>
+
 <h3>Comment lire ce résultat</h3>
 <p>
-  La catégorie la plus probable est celle qui a la plus forte probabilité. L'alerte, elle, repose uniquement sur la probabilité
-  de réadmission en moins de 30 jours : un patient peut donc avoir « &gt;30 » ou « NO » comme catégorie la plus probable
-  et déclencher quand même l'alerte.
+  Le niveau de risque dépend de la probabilité que le patient revienne dans les 30 jours après sa sortie.
+  Un patient peut donc avoir plus de chances de ne pas revenir et déclencher quand même l'alerte,
+  si sa probabilité de retour rapide dépasse le seuil d'alerte.
 </p>
 <p><small>
   Fiabilité du modèle (jeu de test) : accuracy {{ (r.metrics.accuracy * 100) | round(1) }} %
-  contre {{ (r.metrics.baseline_accuracy * 100) | round(1) }} % pour un modèle qui répondrait toujours « NO ».
+  contre {{ (r.metrics.baseline_accuracy * 100) | round(1) }} % pour un modèle qui répondrait toujours « pas de retour ».
   En suivant les {{ r.stats.share_alerted_pct }} % de patients les plus à risque, on repère environ
-  {{ r.stats.recall_pct }} % des réadmissions &lt; 30 jours ({{ r.stats.precision_pct }} % des alertes sont de vrais cas,
+  {{ r.stats.recall_pct }} % des réadmissions de moins de 30 jours ({{ r.stats.precision_pct }} % des alertes sont de vrais cas,
   contre {{ r.stats.base_rate_pct }} % dans la population). Démonstration pédagogique : ces résultats sont des hypothèses
   à valider par des cliniciens.
 </small></p>
