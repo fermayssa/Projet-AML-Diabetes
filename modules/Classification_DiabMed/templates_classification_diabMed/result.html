@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Résultat de Classification{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Résultat de Classification DiabMed</h1>
+    
+    {% if prediction_result %}
+    <div class="prediction-result-section">
+        <div class="prediction-main {% if prediction_result.needs_treatment %}prediction-high{% else %}prediction-low{% endif %}">
+            <div class="prediction-status-large">
+                <div class="status-icon-large {% if not prediction_result.needs_treatment %}status-yes{% else %}status-no{% endif %}">
+                    <i class="fas {% if not prediction_result.needs_treatment %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                </div>
+                <div class="prediction-verdict">
+                    <h4>Statut du Traitement Antidiabétique</h4>
+                    <div class="verdict-badge {% if not prediction_result.needs_treatment %}verdict-yes{% else %}verdict-no{% endif %}">
+                        {% if prediction_result.needs_treatment %}
+                        <i class="fas fa-exclamation-triangle"></i> {{ prediction_result.label }}
+                        {% else %}
+                        <i class="fas fa-check"></i> {{ prediction_result.label }}
+                        {% endif %}
+                    </div>
+                    <div class="prediction-details">
+                        <p><strong>Modèle:</strong> {{ prediction_result.model_type }}</p>
+                        <p><strong>Probabilité (sans traitement):</strong> {{ prediction_result.p_no }}%</p>
+                        <p><strong>Probabilité (avec traitement):</strong> {{ prediction_result.p_yes }}%</p>
+                        <p><strong>Seuil de décision:</strong> {{ prediction_result.seuil }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="error">Aucun résultat de prédiction disponible.</div>
+    {% endif %}
+    
+    <div class="navigation-buttons">
+        <a href="{{ url_for('decision_support.traitement') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Retour au formulaire
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.prenom }} {{ patient.nom }} - Clinique{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-user"></i> Détails du Patient</h1>
+  <a href="{{ url_for('clinique.patients') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+</div>
+
+<div class="patient-profile">
+  <div class="profile-header">
+    <div class="avatar"><i class="fas fa-user"></i></div>
+    <div class="profile-info">
+      <h2>{{ patient.prenom }} {{ patient.nom }}</h2>
+    </div>
+  </div>
+
+  <div class="profile-details">
+    <div class="detail-group">
+      <label>Âge</label>
+      <span>{{ patient.age }} ans</span>
+    </div>
+    <div class="detail-group">
+      <label>Téléphone</label>
+      <span>{{ patient.telephone }}</span>
+    </div>
+    <div class="detail-group">
+      <label>Email</label>
+      <span>{{ patient.email }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-file-medical"></i> Historique médical</h2>
+  <div class="empty-state">
+    <p>Aucun historique médical disponible pour ce patient.</p>
+  </div>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-calendar-alt"></i> Rendez-vous</h2>
+  <div class="empty-state">
+    <p>Aucun rendez-vous planifié pour ce patient.</p>
+  </div>
+  <a href="{{ url_for('clinique.nouveau_rendez_vous') }}" class="btn btn-primary"><i class="fas fa-calendar-plus"></i> Prendre un rendez-vous</a>
+</div>
+
+<div class="action-buttons">
+  <button class="btn btn-warning"><i class="fas fa-edit"></i> ✏️ Modifier le profil</button>
+  <button class="btn btn-primary"><i class="fas fa-stethoscope"></i> 📄 Nouvelle consultation</button>
+  <button class="btn btn-danger"><i class="fas fa-trash"></i> 🗑️ Supprimer le patient</button>
+</div>
+{% endblock %}

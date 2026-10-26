@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Formulaire de Classification{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Formulaire de Classification</h1>
+    <form id="classificationForm">
+        <!-- TODO: Ajouter les champs du formulaire -->
+        <button type="submit" class="btn btn-primary">Classifier</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('classificationForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // TODO: Implémenter la soumission du formulaire
+});
+</script>
+{% endblock %}

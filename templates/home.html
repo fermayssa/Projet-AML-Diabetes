@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GlycoFlow - Accueil</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .home-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .home-header {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    .home-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .home-brand i {
+      font-size: 36px;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .home-logo {
+      width: 36px;
+      height: 36px;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .home-nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    .home-nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 14px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out forwards;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .home-nav a:nth-child(1) { animation-delay: 0.2s; }
+    .home-nav a:nth-child(2) { animation-delay: 0.3s; }
+    .home-nav a:nth-child(3) { animation-delay: 0.4s; }
+    .home-nav a:nth-child(4) { animation-delay: 0.5s; }
+
+    .home-nav a:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .home-nav .btn-login {
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .home-nav .btn-login:hover {
+      background: #fff;
+      color: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .hero-section {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      padding: 60px 20px;
+      background-image: url('https://images.unsplash.com/photo-1586773860418-d37222d8fce3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      position: relative;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content h1 {
+      font-size: 56px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 0.6s forwards;
+    }
+
+    .hero-content p {
+      font-size: 24px;
+      margin-bottom: 40px;
+      opacity: 0.95;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 0.8s forwards;
+    }
+
+    .hero-description {
+      font-size: 17px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 1s forwards;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 20px 30px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      margin-top: 60px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-stat {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .hero-stat:nth-child(1) { animation-delay: 1.2s; }
+    .hero-stat:nth-child(2) { animation-delay: 1.4s; }
+    .hero-stat:nth-child(3) { animation-delay: 1.6s; }
+    .hero-stat:nth-child(4) { animation-delay: 1.8s; }
+
+    .hero-stat i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: scaleIn 0.6s ease-out 2s forwards;
+      opacity: 0;
+    }
+
+    .hero-stat .number {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 2.2s forwards;
+    }
+
+    .hero-stat .label {
+      font-size: 16px;
+      opacity: 0.9;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 2.4s forwards;
+    }
+
+    .features-section {
+      background: #fff;
+      padding: 80px 40px;
+    }
+
+    .features-section h2 {
+      text-align: center;
+      color: #1e3c72;
+      font-size: 36px;
+      margin-bottom: 60px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      text-align: center;
+      padding: 40px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      transition: transform 0.3s;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 2.6s; }
+    .feature-card:nth-child(2) { animation-delay: 2.8s; }
+    .feature-card:nth-child(3) { animation-delay: 3s; }
+    .feature-card:nth-child(4) { animation-delay: 3.2s; }
+    .feature-card:nth-child(5) { animation-delay: 3.4s; }
+    .feature-card:nth-child(6) { animation-delay: 3.6s; }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .feature-card i {
+      font-size: 56px;
+      color: #667eea;
+      margin-bottom: 24px;
+      animation: scaleIn 0.5s ease-out forwards;
+    }
+
+    .feature-card h3 {
+      color: #1e3c72;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .feature-card p {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .home-footer {
+      background: #1e3c72;
+      color: #fff;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .home-footer p {
+      margin: 8px 0;
+      opacity: 0.9;
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-section {
+        flex-direction: column;
+        padding: 40px 20px;
+      }
+
+      .hero-content {
+        padding-right: 0;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+      }
+
+      .hero-content h1 {
+        font-size: 36px;
+      }
+
+      .hero-content p {
+        font-size: 18px;
+      }
+
+      .hero-image {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="home-container">
+    <header class="home-header">
+      <a href="/" class="home-brand">
+        <img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" class="home-logo">
+        <span>GlycoFlow</span>
+      </a>
+      <nav class="home-nav">
+        <a href="#services">Services</a>
+        <a href="#about">À propos</a>
+        <a href="#contact">Contact</a>
+        <a href="/login" class="btn-login">
+          <i class="fas fa-sign-in-alt"></i> Connexion
+        </a>
+      </nav>
+    </header>
+    
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1>GlycoFlow</h1>
+        <p>Anticiper, adapter, accompagner chaque patient diabétique</p>
+        <p class="hero-description">Plateforme intelligente de gestion du diabète utilisant l'intelligence artificielle pour personnaliser les traitements et améliorer la qualité de vie des patients.</p>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <i class="fas fa-bed"></i>
+            <div class="number">450</div>
+            <div class="label">Lits disponibles</div>
+          </div>
+          <div class="hero-stat">
+            <i class="fas fa-user-md"></i>
+            <div class="number">120</div>
+            <div class="label">Médecins</div>
+          </div>
+          <div class="hero-stat">
+            <i class="fas fa-users"></i>
+            <div class="number">5000+</div>
+            <div class="label">Patients / mois</div>
+          </div>
+          <div class="hero-stat">
+            <i class="fas fa-star"></i>
+            <div class="number">98%</div>
+            <div class="label">Satisfaction</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="features-section" id="services">
+      <h2>Nos Services</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <i class="fas fa-heartbeat"></i>
+          <h3>Soins Critiques</h3>
+          <p>Unité de soins intensifs équipée des dernières technologies pour les cas critiques</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-brain"></i>
+          <h3>Neurologie</h3>
+          <p>Service spécialisé dans les troubles neurologiques et cérébraux</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-heart"></i>
+          <h3>Cardiologie</h3>
+          <p>Soins cardiaques complets avec équipement de diagnostic avancé</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-syringe"></i>
+          <h3>Diabétologie</h3>
+          <p>Prise en charge spécialisée du diabète avec système d'aide à la décision</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-baby"></i>
+          <h3>Pédiatrie</h3>
+          <p>Soins pédiatriques complets dans un environnement adapté aux enfants</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-ambulance"></i>
+          <h3>Urgences</h3>
+          <p>Service d'urgence disponible 24h/24 et 7j/7</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="home-footer" id="contact">
+      <p><i class="fas fa-map-marker-alt"></i> 123 Avenue de la Santé, 75000 Paris</p>
+      <p><i class="fas fa-phone"></i> 01 23 45 67 89</p>
+      <p><i class="fas fa-envelope"></i> contact@glycoflow.fr</p>
+      <p><i class="fas fa-clock"></i> Urgences: 24h/24 - Consultations: 8h-18h</p>
+      <p style="margin-top: 20px; opacity: 0.7;">&copy; 2026 GlycoFlow - Tous droits réservés</p>
+    </footer>
+  </div>
+</body>
+</html>

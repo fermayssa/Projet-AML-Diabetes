@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Instabilité Thérapeutique - Aide à la Décision{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-pills"></i> Détection de l'Instabilité Thérapeutique</h1>
+  <div class="patient-selector">
+    <select id="patientSelect" onchange="changePatient()">
+      {% for p in patients %}
+      <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
+        {{ p.prenom }} {{ p.nom }} ({{ p.age }} ans)
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- Patient Info -->
+<div class="patient-info-card">
+  <div class="patient-header-mini">
+    <div class="patient-avatar-small">
+      <i class="fas fa-user"></i>
+    </div>
+    <div>
+      <h3>{{ patient.prenom }} {{ patient.nom }}</h3>
+      <p class="patient-meta-mini">{{ patient.age }} ans • Durée séjour: {{ patient.time_in_hospital }} jours</p>
+    </div>
+  </div>
+</div>
+
+<!-- Résultat de prédiction -->
+<div class="prediction-result-section">
+  <div class="prediction-main {% if patient.change_risk|default(0) > 0.5 %}prediction-high{% elif patient.change_risk|default(0) > 0.3 %}prediction-medium{% else %}prediction-low{% endif %}">
+    <div class="prediction-gauge-large">
+      <div class="gauge-container-large">
+        <div class="gauge-fill-large {% if patient.change_risk|default(0) > 0.5 %}gauge-danger{% elif patient.change_risk|default(0) > 0.3 %}gauge-warning{% else %}gauge-success{% endif %}" 
+             style="width: {{ (patient.change_risk|default(0) * 100) }}%">
+        </div>
+        <div class="gauge-value-large">{{ (patient.change_risk|default(0) * 100)|round(1) }}%</div>
+      </div>
+    </div>
+    <div class="prediction-verdict">
+      <h4>Prédiction: Modification du traitement</h4>
+      <div class="verdict-badge {% if patient.change_risk|default(0) > 0.5 %}verdict-yes{% else %}verdict-no{% endif %}">
+        {% if patient.change_risk|default(0) > 0.5 %}
+        <i class="fas fa-exclamation-triangle"></i> CHANGEMENT PROBABLE
+        {% else %}
+        <i class="fas fa-check-circle"></i> TRAITEMENT STABLE
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Explication -->
+<div class="explanation-section">
+  <h3><i class="fas fa-info-circle"></i> Comprendre l'indicateur</h3>
+  <div class="explanation-card">
+    <p><strong>Variable cible:</strong> <code>change</code> indique si une modification du traitement antidiabétique a été nécessaire pendant le séjour (valeur "Ch" pour changement).</p>
+    <p><strong>Objectif:</strong> Détecter dès l'admission les patients dont le traitement devra être adapté, permettant aux cliniciens d'anticiper les ajustements thérapeutiques avant la sortie.</p>
+    <p><strong>Impact:</strong> Une détection précoce permet d'optimiser la prise en charge, de réduire les complications et d'améliorer l'observance post-sortie.</p>
+  </div>
+</div>
+
+<!-- Facteurs de risque -->
+<div class="factors-section">
+  <h3><i class="fas fa-exclamation-triangle"></i> Facteurs de Risque d'Instabilité</h3>
+  <div class="risk-factors-grid">
+    <div class="risk-factor-card">
+      <div class="risk-icon">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <h4>Glycémie instable</h4>
+      <p>Variations importantes de la glycémie nécessitant des ajustements</p>
+    </div>
+    <div class="risk-factor-card">
+      <div class="risk-icon">
+        <i class="fas fa-allergies"></i>
+      </div>
+      <h4>Comorbidités</h4>
+      <p>Présence de conditions affectant le métabolisme</p>
+    </div>
+    <div class="risk-factor-card">
+      <div class="risk-icon">
+        <i class="fas fa-pills"></i>
+      </div>
+      <h4>Polymédication</h4>
+      <p>Interactions médicamenteuses potentielles</p>
+    </div>
+    <div class="risk-factor-card">
+      <div class="risk-icon">
+        <i class="fas fa-weight"></i>
+      </div>
+      <h4>IMC élevé</h4>
+      <p>Obésité nécessitant des ajustements posologiques</p>
+    </div>
+  </div>
+</div>
+
+<!-- Recommandations -->
+<div class="recommendations-box">
+  <h3><i class="fas fa-lightbulb"></i> Recommandations Cliniques</h3>
+  <div class="rec-content {% if patient.change_risk|default(0) > 0.5 %}rec-high-risk{% else %}rec-low-risk{% endif %}">
+    {% if patient.change_risk|default(0) > 0.5 %}
+    <div class="rec-alert">
+      <i class="fas fa-exclamation-circle"></i>
+      <strong>Instabilité thérapeutique probable - Actions recommandées:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Surveiller étroitement la glycémie (4x/jour minimum)</li>
+      <li><i class="fas fa-check"></i> Consulter l'endocrinologue pour ajustement du protocole</li>
+      <li><i class="fas fa-check"></i> Vérifier les interactions médicamenteuses</li>
+      <li><i class="fas fa-check"></i> Éduquer le patient sur les signes de déséquilibre</li>
+      <li><i class="fas fa-check"></i> Préparer un plan de sortie avec ajustement thérapeutique</li>
+    </ul>
+    {% else %}
+    <div class="rec-success">
+      <i class="fas fa-check-circle"></i>
+      <strong>Traitement stable - Maintenir le protocole actuel:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Surveillance glycémique standard</li>
+      <li><i class="fas fa-check"></i> Maintenir le traitement actuel</li>
+      <li><i class="fas fa-check"></i> Éducation thérapeutique de routine</li>
+    </ul>
+    {% endif %}
+  </div>
+</div>
+
+<div class="navigation-buttons">
+  <a href="{{ url_for('decision_support.dashboard', patient_id=patient.id) }}" class="btn btn-primary">
+    <i class="fas fa-chart-line"></i> Tableau de bord global
+  </a>
+</div>
+
+<script>
+function changePatient() {
+  const patientId = document.getElementById('patientSelect').value;
+  window.location.href = `{{ url_for('decision_support.instabilite') }}?patient_id=${patientId}`;
+}
+</script>
+{% endblock %}

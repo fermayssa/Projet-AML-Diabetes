@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier Rendez-vous - Clinique{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-calendar-edit"></i> Modifier Rendez-vous</h1>
+  <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+</div>
+
+<div class="form-container">
+  <form method="POST" action="{{ url_for('clinique.edit_rendez_vous', rdv_id=rdv.id) }}">
+    <div class="form-section">
+      <h2>Informations du rendez-vous</h2>
+      <div class="form-group">
+        <label for="patient_id">Patient *</label>
+        <select id="patient_id" name="patient_id" required>
+          <option value="">Sélectionner un patient...</option>
+          {% for patient in patients %}
+          <option value="{{ patient.id }}" {% if rdv.patient_id == patient.id %}selected{% endif %}>{{ patient.prenom }} {{ patient.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="date">Date et heure *</label>
+          <input type="datetime-local" id="date" name="date" required value="{{ rdv.date or '' }}">
+        </div>
+        <div class="form-group">
+          <label for="duree">Durée (minutes)</label>
+          <input type="number" id="duree" name="duree" value="{{ rdv.duree or 30 }}" min="15" step="15">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type_rdv">Type de consultation *</label>
+          <select id="type_rdv" name="type_rdv" required>
+            <option value="">Sélectionner...</option>
+            <option value="consultation" {% if rdv.type_rdv == 'consultation' %}selected{% endif %}>Consultation générale</option>
+            <option value="suivi" {% if rdv.type_rdv == 'suivi' %}selected{% endif %}>Suivi diabète</option>
+            <option value="examen" {% if rdv.type_rdv == 'examen' %}selected{% endif %}>Analyse sanguine</option>
+            <option value="cardiologie" {% if rdv.type_rdv == 'cardiologie' %}selected{% endif %}>Cardiologie</option>
+            <option value="urgence" {% if rdv.type_rdv == 'urgence' %}selected{% endif %}>Urgence</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="statut">Statut</label>
+          <select id="statut" name="statut">
+            <option value="planifie" {% if rdv.statut == 'planifie' %}selected{% endif %}>Planifié</option>
+            <option value="confirme" {% if rdv.statut == 'confirme' %}selected{% endif %}>Confirmé</option>
+            <option value="en_cours" {% if rdv.statut == 'en_cours' %}selected{% endif %}>En cours</option>
+            <option value="termine" {% if rdv.statut == 'termine' %}selected{% endif %}>Terminé</option>
+            <option value="annule" {% if rdv.statut == 'annule' %}selected{% endif %}>Annulé</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Détails</h2>
+      <div class="form-group">
+        <label for="motif">Motif de consultation</label>
+        <textarea id="motif" name="motif" rows="3" placeholder="Décrivez le motif de la consultation...">{{ rdv.motif or '' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="notes">Notes additionnelles</label>
+        <textarea id="notes" name="notes" rows="2" placeholder="Informations complémentaires...">{{ rdv.notes or '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 💾 Enregistrer les modifications</button>
+      <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

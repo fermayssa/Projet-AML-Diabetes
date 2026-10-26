@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Administrateur{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-user-shield"></i> Dashboard Administrateur</h1>
+  <div class="user-actions">
+    <span class="welcome-text">Bienvenue, {{ session.user.username }}</span>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger">
+      <i class="fas fa-sign-out-alt"></i> Déconnexion
+    </a>
+  </div>
+</div>
+
+<div class="admin-stats-grid">
+  <div class="admin-stat-card">
+    <div class="stat-icon-admin">
+      <i class="fas fa-users"></i>
+    </div>
+    <div class="stat-info-admin">
+      <div class="stat-number-admin">1,234</div>
+      <div class="stat-label-admin">Patients total</div>
+    </div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="stat-icon-admin">
+      <i class="fas fa-user-md"></i>
+    </div>
+    <div class="stat-info-admin">
+      <div class="stat-number-admin">120</div>
+      <div class="stat-label-admin">Médecins actifs</div>
+    </div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="stat-icon-admin">
+      <i class="fas fa-bed"></i>
+    </div>
+    <div class="stat-info-admin">
+      <div class="stat-number-admin">450</div>
+      <div class="stat-label-admin">Lits occupés</div>
+    </div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="stat-icon-admin">
+      <i class="fas fa-calendar-check"></i>
+    </div>
+    <div class="stat-info-admin">
+      <div class="stat-number-admin">89</div>
+      <div class="stat-label-admin">Rendez-vous/jour</div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-sections">
+  <div class="admin-section">
+    <h3><i class="fas fa-cogs"></i> Gestion Système</h3>
+    <div class="admin-actions-grid">
+      <a href="/app" class="admin-action-card">
+        <i class="fas fa-th-large"></i>
+        <h4>Modules</h4>
+        <p>Gérer les modules de l'application</p>
+      </a>
+      <a href="#" class="admin-action-card">
+        <i class="fas fa-users-cog"></i>
+        <h4>Utilisateurs</h4>
+        <p>Gérer les comptes utilisateurs</p>
+      </a>
+      <a href="#" class="admin-action-card">
+        <i class="fas fa-database"></i>
+        <h4>Base de données</h4>
+        <p>Configuration et maintenance</p>
+      </a>
+      <a href="#" class="admin-action-card">
+        <i class="fas fa-shield-alt"></i>
+        <h4>Sécurité</h4>
+        <p>Paramètres de sécurité</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <h3><i class="fas fa-chart-line"></i> Statistiques Hospitalières</h3>
+    <div class="admin-actions-grid">
+      <a href="{{ url_for('clinique.accueil') }}" class="admin-action-card">
+        <i class="fas fa-hospital"></i>
+        <h4>Clinique</h4>
+        <p>Gestion des patients et rendez-vous</p>
+      </a>
+      <a href="{{ url_for('decision_support.dashboard') }}" class="admin-action-card">
+        <i class="fas fa-brain"></i>
+        <h4>Aide à la Décision</h4>
+        <p>Système d'aide à la décision clinique</p>
+      </a>
+      <a href="#" class="admin-action-card">
+        <i class="fas fa-file-medical"></i>
+        <h4>Rapports</h4>
+        <p>Rapports et analyses</p>
+      </a>
+      <a href="#" class="admin-action-card">
+        <i class="fas fa-cog"></i>
+        <h4>Paramètres</h4>
+        <p>Configuration générale</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .welcome-text {
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .admin-stat-card {
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  
+  .stat-icon-admin {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 28px;
+  }
+  
+  .stat-info-admin {
+    flex: 1;
+  }
+  
+  .stat-number-admin {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e3c72;
+    line-height: 1;
+  }
+  
+  .stat-label-admin {
+    color: #666;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  
+  .admin-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+  }
+  
+  .admin-section {
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  
+  .admin-section h3 {
+    color: #1e3c72;
+    margin-bottom: 24px;
+    font-size: 20px;
+  }
+  
+  .admin-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  
+  .admin-action-card {
+    background: #f8f9fa;
+    padding: 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  
+  .admin-action-card:hover {
+    background: #e9ecef;
+    transform: translateY(-4px);
+  }
+  
+  .admin-action-card i {
+    font-size: 32px;
+    color: #667eea;
+    margin-bottom: 12px;
+  }
+  
+  .admin-action-card h4 {
+    color: #1e3c72;
+    margin: 8px 0;
+    font-size: 16px;
+  }
+  
+  .admin-action-card p {
+    color: #666;
+    font-size: 13px;
+    margin: 0;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier Cluster - Aide à la Décision{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-chart-pie"></i> Modifier Cluster</h1>
+  <a href="{{ url_for('decision_support.clustering') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+</div>
+
+<div class="form-container">
+  <form method="POST" action="{{ url_for('decision_support.edit_cluster', cluster_id=cluster.id) }}">
+    <div class="form-section">
+      <h2>Informations du cluster</h2>
+      <div class="form-group">
+        <label for="nom">Nom du cluster *</label>
+        <input type="text" id="nom" name="nom" required value="{{ cluster.nom or '' }}">
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3" placeholder="Description du cluster...">{{ cluster.description or '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Statistiques</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="taille">Taille (nombre de patients)</label>
+          <input type="number" id="taille" name="taille" value="{{ cluster.taille or 0 }}">
+        </div>
+        <div class="form-group">
+          <label for="age_moyen">Âge moyen</label>
+          <input type="number" step="0.1" id="age_moyen" name="age_moyen" value="{{ cluster.age_moyen or 0 }}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="duree_sejour_moyenne">Durée séjour moyenne (jours)</label>
+          <input type="number" step="0.1" id="duree_sejour_moyenne" name="duree_sejour_moyenne" value="{{ cluster.duree_sejour_moyenne or 0 }}">
+        </div>
+        <div class="form-group">
+          <label for="readmission_rate">Taux de réadmission</label>
+          <input type="number" step="0.01" min="0" max="1" id="readmission_rate" name="readmission_rate" value="{{ cluster.readmission_rate or 0 }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="change_rate">Taux de changement de traitement</label>
+        <input type="number" step="0.01" min="0" max="1" id="change_rate" name="change_rate" value="{{ cluster.change_rate or 0 }}">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Conditions fréquentes (JSON)</h2>
+      <div class="form-group">
+        <label for="conditions_frequentes">Conditions fréquentes</label>
+        <textarea id="conditions_frequentes" name="conditions_frequentes" rows="3" placeholder='["Condition1", "Condition2"]'>{{ cluster.conditions_frequentes or '[]' }}</textarea>
+        <small>Format JSON: ["Condition1", "Condition2"]</small>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 💾 Enregistrer les modifications</button>
+      <a href="{{ url_for('decision_support.clustering') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

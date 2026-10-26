@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Nouveau Rendez-vous - Clinique{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-calendar-plus"></i> Nouveau Rendez-vous</h1>
+  <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+</div>
+
+<div class="form-container">
+  <form method="POST" action="{{ url_for('clinique.rendez_vous') }}">
+    <div class="form-section">
+      <h2>Informations du rendez-vous</h2>
+      <div class="form-group">
+        <label for="patient">Patient *</label>
+        <select id="patient" name="patient" required>
+          <option value="">Sélectionner un patient...</option>
+          {% for patient in patients %}
+          <option value="{{ patient.id }}">{{ patient.prenom }} {{ patient.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="date">Date *</label>
+          <input type="date" id="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label for="heure">Heure *</label>
+          <input type="time" id="heure" name="heure" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="duree">Durée (minutes)</label>
+          <input type="number" id="duree" name="duree" value="30" min="15" step="15">
+        </div>
+        <div class="form-group">
+          <label for="type">Type de consultation *</label>
+          <select id="type" name="type" required>
+            <option value="">Sélectionner...</option>
+            <option value="Consultation générale">Consultation générale</option>
+            <option value="Suivi diabète">Suivi diabète</option>
+            <option value="Analyse sanguine">Analyse sanguine</option>
+            <option value="Cardiologie">Cardiologie</option>
+            <option value="Urgence">Urgence</option>
+            <option value="Vaccination">Vaccination</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="medecin">Médecin</label>
+        <select id="medecin" name="medecin">
+          <option value="">Non assigné</option>
+          <option value="Dr. Martin">Dr. Martin - Médecin généraliste</option>
+          <option value="Dr. Dupont">Dr. Dupont - Endocrinologue</option>
+          <option value="Dr. Bernard">Dr. Bernard - Cardiologue</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Détails</h2>
+      <div class="form-group">
+        <label for="motif">Motif de consultation</label>
+        <textarea id="motif" name="motif" rows="3" placeholder="Décrivez le motif de la consultation..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="notes">Notes additionnelles</label>
+        <textarea id="notes" name="notes" rows="2" placeholder="Informations complémentaires..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 💾 Planifier le rendez-vous</button>
+      <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

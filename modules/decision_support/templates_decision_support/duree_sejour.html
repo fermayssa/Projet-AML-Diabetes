@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Durée de Séjour - Aide à la Décision{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-clock"></i> Prévision de la Durée de Séjour</h1>
+  <div class="patient-selector">
+    <select id="patientSelect" onchange="changePatient()">
+      {% for p in patients %}
+      <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
+        {{ p.prenom }} {{ p.nom }} ({{ p.age }} ans)
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- Patient Info -->
+<div class="patient-info-card">
+  <div class="patient-header-mini">
+    <div class="patient-avatar-small">
+      <i class="fas fa-user"></i>
+    </div>
+    <div>
+      <h3>{{ patient.prenom }} {{ patient.nom }}</h3>
+      <p class="patient-meta-mini">{{ patient.age }} ans • {{ patient.admission_type }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Résultat de prédiction -->
+<div class="prediction-result-section">
+  <div class="prediction-main {% if patient.time_in_hospital|default(0) > 7 %}prediction-high{% elif patient.time_in_hospital|default(0) > 4 %}prediction-medium{% else %}prediction-low{% endif %}">
+    <div class="prediction-duration-large">
+      <div class="duration-display">
+        <div class="duration-value-large">{{ patient.time_in_hospital or 0 }}</div>
+        <div class="duration-unit-large">jours</div>
+      </div>
+      <div class="prediction-verdict">
+        <h4>Prévision de la durée de séjour</h4>
+        <div class="verdict-badge {% if patient.time_in_hospital|default(0) > 7 %}verdict-warning{% elif patient.time_in_hospital|default(0) > 4 %}verdict-info{% else %}verdict-success{% endif %}">
+          {% if patient.time_in_hospital|default(0) <= 3 %}
+          <i class="fas fa-check"></i> COURT SÉJOUR
+          {% elif patient.time_in_hospital|default(0) <= 7 %}
+          <i class="fas fa-info-circle"></i> SÉJOUR MOYEN
+          {% else %}
+          <i class="fas fa-exclamation-triangle"></i> SÉJOUR PROLONGÉ
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Métriques du modèle -->
+<div class="metrics-section">
+  <h3><i class="fas fa-chart-line"></i> Performance du Modèle</h3>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <i class="fas fa-calculator"></i>
+        <h4>MAE</h4>
+      </div>
+      <div class="metric-value">{{ metrics.mae }}</div>
+      <div class="metric-label">Erreur absolue moyenne (jours)</div>
+      <div class="metric-comparison">
+        <span class="comparison-label">Baseline:</span>
+        <span class="comparison-value">{{ metrics.baseline_mae }}</span>
+        <span class="comparison-improvement text-success">-{{ metrics.improvement }}%</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header">
+        <i class="fas fa-chart-area"></i>
+        <h4>RMSE</h4>
+      </div>
+      <div class="metric-value">{{ metrics.rmse }}</div>
+      <div class="metric-label">Racine de l'erreur quadratique moyenne</div>
+      <div class="metric-comparison">
+        <span class="comparison-label">Baseline:</span>
+        <span class="comparison-value">{{ metrics.baseline_rmse }}</span>
+        <span class="comparison-improvement text-success">-{{ ((1 - metrics.rmse/metrics.baseline_rmse) * 100)|round(0) }}%</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header">
+        <i class="fas fa-percentage"></i>
+        <h4>R²</h4>
+      </div>
+      <div class="metric-value">{{ metrics.r2 }}</div>
+      <div class="metric-label">Coefficient de détermination</div>
+      <div class="metric-comparison">
+        <span class="comparison-label">Qualité:</span>
+        <span class="comparison-value text-success">Bonne</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Explication -->
+<div class="explanation-section">
+  <h3><i class="fas fa-info-circle"></i> Comprendre la prévision</h3>
+  <div class="explanation-card">
+    <p><strong>Variable cible:</strong> <code>time_in_hospital</code> indique la durée du séjour en jours (1 à 14 jours).</p>
+    <p><strong>Objectif:</strong> Anticiper la durée de séjour pour planifier les lits, le personnel et les examens, réduire les coûts et préparer la sortie.</p>
+    <p><strong>Méthodologie:</strong> Modèle de régression comparé à un modèle de référence (prédiction par la moyenne). L'amélioration de {{ metrics.improvement }}% montre la supériorité du modèle.</p>
+  </div>
+</div>
+
+<!-- Recommandations par durée -->
+<div class="recommendations-section">
+  <h3><i class="fas fa-lightbulb"></i> Recommandations par Durée de Séjour</h3>
+  <div class="duration-recommendations">
+    <div class="duration-rec-card rec-short">
+      <div class="rec-icon">
+        <i class="fas fa-bolt"></i>
+      </div>
+      <h4>Court séjour (1-3 jours)</h4>
+      <ul>
+        <li>Planification rapide de la sortie</li>
+        <li>Éducation thérapeutique accélérée</li>
+        <li>Coordination avec services externes</li>
+      </ul>
+    </div>
+    <div class="duration-rec-card rec-medium">
+      <div class="rec-icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <h4>Séjour moyen (4-7 jours)</h4>
+      <ul>
+        <li>Surveillance standard</li>
+        <li>Planification progressive</li>
+        <li>Préparation à domicile adaptée</li>
+      </ul>
+    </div>
+    <div class="duration-rec-card rec-long">
+      <div class="rec-icon">
+        <i class="fas fa-hospital"></i>
+      </div>
+      <h4>Séjour prolongé (8-14 jours)</h4>
+      <ul>
+        <li>Allocation de ressources étendues</li>
+        <li>Planification soins de longue durée</li>
+        <li>Coordination multidisciplinaire</li>
+        <li>Préparation sortie complexe</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Recommandations pour le patient -->
+<div class="recommendations-box">
+  <h3><i class="fas fa-user-md"></i> Recommandations pour ce patient</h3>
+  <div class="rec-content {% if patient.time_in_hospital|default(0) > 7 %}rec-high-risk{% elif patient.time_in_hospital|default(0) > 4 %}rec-medium-risk{% else %}rec-low-risk{% endif %}">
+    {% if patient.time_in_hospital|default(0) <= 3 %}
+    <div class="rec-success">
+      <i class="fas fa-check-circle"></i>
+      <strong>Court séjour prévu - Actions:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Préparer la sortie dès l'admission</li>
+      <li><i class="fas fa-check"></i> Éducation thérapeutique intensive</li>
+      <li><i class="fas fa-check"></i> Coordination rapide avec le domicile</li>
+    </ul>
+    {% elif patient.time_in_hospital|default(0) <= 7 %}
+    <div class="rec-info">
+      <i class="fas fa-info-circle"></i>
+      <strong>Séjour moyen prévu - Actions:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Planification standard des ressources</li>
+      <li><i class="fas fa-check"></i> Surveillance régulière</li>
+      <li><i class="fas fa-check"></i> Préparation progressive à la sortie</li>
+    </ul>
+    {% else %}
+    <div class="rec-alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      <strong>Séjour prolongé prévu - Actions:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Allouer des ressources supplémentaires</li>
+      <li><i class="fas fa-check"></i> Planifier des soins de longue durée</li>
+      <li><i class="fas fa-check"></i> Coordination multidisciplinaire</li>
+      <li><i class="fas fa-check"></i> Préparer une sortie complexe</li>
+      <li><i class="fas fa-check"></i> Anticiper les coûts élevés</li>
+    </ul>
+    {% endif %}
+  </div>
+</div>
+
+<div class="navigation-buttons">
+  <a href="{{ url_for('decision_support.dashboard', patient_id=patient.id) }}" class="btn btn-primary">
+    <i class="fas fa-chart-line"></i> Tableau de bord global
+  </a>
+</div>
+
+<script>
+function changePatient() {
+  const patientId = document.getElementById('patientSelect').value;
+  window.location.href = `{{ url_for('decision_support.duree_sejour') }}?patient_id=${patientId}`;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Classification DiabMed{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Classification DiabMed</h1>
+    <p>Système de classification des patients diabétiques</p>
+    <a href="{{ url_for('classification_diabmed.form') }}" class="btn btn-primary">Nouvelle Classification</a>
+</div>
+{% endblock %}

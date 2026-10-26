@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Traitement Antidiabétique - Aide à la Décision{% endblock %}
+
+{% block content %}
+<style>
+  .form-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .form-section h2 {
+    color: #1e3c72;
+    margin-bottom: 10px;
+    font-size: 24px;
+  }
+  
+  .form-section p {
+    color: #666;
+    margin-bottom: 25px;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background: #f9f9f9;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    background: #fff;
+  }
+  
+  .form-group select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+    appearance: none;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  }
+  
+  .error, .warn {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  
+  .error {
+    background: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+  }
+  
+  .warn {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+  }
+</style>
+<div class="page-header">
+  <h1><i class="fas fa-prescription-bottle-alt"></i> Identification Patients Sans Traitement</h1>
+  <div class="patient-selector">
+    <select id="patientSelect" onchange="changePatient()">
+      {% for p in patients %}
+      <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
+        {{ p.prenom }} {{ p.nom }} ({{ p.age }} ans)
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- Formulaire de saisie pour nouveau patient -->
+<div class="form-section">
+  <h2><i class="fas fa-user-plus"></i> Saisir un nouveau patient</h2>
+  <p>Renseignez les données d'hospitalisation du patient pour prédire s'il est sous traitement antidiabétique.</p>
+  
+  {% if form_error %}<div class="error">{{ form_error }}</div>{% endif %}
+  {% if form_warning %}<div class="warn">{{ form_warning }}</div>{% endif %}
+  
+  {% if form_ready %}
+  <form method="post" action="{{ url_for('decision_support.traitement_predict') }}">
+    <div class="form-row">
+      {% for name, label, lo, hi, default in form_numeric %}
+      <div class="form-group">
+        <label>{{ label }}</label>
+        <input type="number" name="{{ name }}" min="{{ lo }}" max="{{ hi }}" step="1"
+               value="{{ form_values.get(name, default) }}" required>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="form-row">
+      {% for var, label, options, mode in form_nominal %}
+      <div class="form-group">
+        <label>{{ label }}</label>
+        <select name="{{ var }}">
+          {% for code, text in options %}
+          <option value="{{ code }}" {% if form_values.get(var, mode) == code %}selected{% endif %}>{{ text }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-magic"></i> Prédire
+      </button>
+    </div>
+  </form>
+  {% else %}
+  <div class="error">Le modèle n'est pas disponible. Vérifiez que les artifacts sont présents.</div>
+  {% endif %}
+</div>
+
+<!-- Patient Info -->
+<div class="patient-info-card">
+  <div class="patient-header-mini">
+    <div class="patient-avatar-small">
+      <i class="fas fa-user"></i>
+    </div>
+    <div>
+      <h3>{{ patient.prenom }} {{ patient.nom }}</h3>
+      <p class="patient-meta-mini">{{ patient.age }} ans • {{ patient.admission_type }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Résultat de prédiction -->
+<div class="prediction-result-section">
+  <div class="prediction-main {% if prediction_result and prediction_result.needs_treatment %}prediction-high{% elif patient.diabetes_med == 'No' %}prediction-high{% else %}prediction-low{% endif %}">
+    <div class="prediction-status-large">
+      <div class="status-icon-large {% if (prediction_result and not prediction_result.needs_treatment) or patient.diabetes_med == 'Yes' %}status-yes{% else %}status-no{% endif %}">
+        <i class="fas {% if (prediction_result and not prediction_result.needs_treatment) or patient.diabetes_med == 'Yes' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+      </div>
+      <div class="prediction-verdict">
+        <h4>Statut du Traitement Antidiabétique</h4>
+        <div class="verdict-badge {% if (prediction_result and not prediction_result.needs_treatment) or patient.diabetes_med == 'Yes' %}verdict-yes{% else %}verdict-no{% endif %}">
+          {% if prediction_result %}
+            {% if prediction_result.needs_treatment %}
+            <i class="fas fa-exclamation-triangle"></i> SANS TRAITEMENT MÉDICAMENTEUX (Prédiction)
+            {% else %}
+            <i class="fas fa-check"></i> SOUS TRAITEMENT MÉDICAMENTEUX (Prédiction)
+            {% endif %}
+          {% else %}
+            {% if patient.diabetes_med == 'Yes' %}
+            <i class="fas fa-check"></i> SOUS TRAITEMENT MÉDICAMENTEUX
+            {% else %}
+            <i class="fas fa-exclamation-triangle"></i> SANS TRAITEMENT MÉDICAMENTEUX
+            {% endif %}
+          {% endif %}
+        </div>
+        {% if prediction_result %}
+        <div class="prediction-details">
+          <p><strong>Modèle:</strong> {{ prediction_result.model_type }}</p>
+          <p><strong>Probabilité:</strong> {{ (prediction_result.probability[1] * 100)|round(1) }}%</p>
+          <p><strong>Seuil de décision:</strong> {{ (prediction_result.threshold * 100)|round(1) }}%</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Patients sans traitement -->
+<div class="no-med-section">
+  <h3><i class="fas fa-user-slash"></i> Patients Sans Traitement Médicamenteux ({{ patients_no_med|length }})</h3>
+  {% if patients_no_med %}
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Âge</th>
+          <th>Type d'admission</th>
+          <th>Durée séjour</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients_no_med %}
+        <tr>
+          <td>{{ p.prenom }} {{ p.nom }}</td>
+          <td>{{ p.age }} ans</td>
+          <td>{{ p.admission_type }}</td>
+          <td>{{ p.time_in_hospital }} jours</td>
+          <td>
+            <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> Voir</button>
+            <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Éduquer</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>Aucun patient sans traitement médicamenteux dans la base.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Recommandations -->
+<div class="recommendations-box">
+  <h3><i class="fas fa-lightbulb"></i> Recommandations</h3>
+  <div class="rec-content {% if (prediction_result and prediction_result.needs_treatment) or patient.diabetes_med == 'No' %}rec-high-risk{% else %}rec-low-risk{% endif %}">
+    {% if (prediction_result and prediction_result.needs_treatment) or (not prediction_result and patient.diabetes_med == 'No') %}
+    <div class="rec-alert">
+      <i class="fas fa-exclamation-circle"></i>
+      <strong>Patient sans traitement médicamenteux - Actions recommandées:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Évaluer l'indication d'un traitement médicamenteux</li>
+      <li><i class="fas fa-check"></i> Renforcer l'éducation sur le régime et l'hygiène de vie</li>
+      <li><i class="fas fa-check"></i> Surveiller étroitement l'HbA1c</li>
+      <li><i class="fas fa-check"></i> Considérer un traitement si glycémie non contrôlée</li>
+      <li><i class="fas fa-check"></i> Planifier un suivi rapproché</li>
+    </ul>
+    {% else %}
+    <div class="rec-success">
+      <i class="fas fa-check-circle"></i>
+      <strong>Patient sous traitement - Maintenir le protocole:</strong>
+    </div>
+    <ul>
+      <li><i class="fas fa-check"></i> Vérifier l'observance du traitement</li>
+      <li><i class="fas fa-check"></i> Surveiller les effets secondaires</li>
+      <li><i class="fas fa-check"></i> Ajuster si nécessaire selon la glycémie</li>
+    </ul>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Statistiques globales -->
+<div class="stats-summary">
+  <h3><i class="fas fa-chart-pie"></i> Statistiques Globales</h3>
+  <div class="stats-cards">
+    <div class="stat-summary-card">
+      <div class="stat-icon-summary">
+        <i class="fas fa-prescription-bottle-alt"></i>
+      </div>
+      <div class="stat-info-summary">
+        <div class="stat-value-summary">{{ (patients|length - patients_no_med|length) }}</div>
+        <div class="stat-label-summary">Avec traitement</div>
+      </div>
+    </div>
+    <div class="stat-summary-card">
+      <div class="stat-icon-summary stat-no-med">
+        <i class="fas fa-user-slash"></i>
+      </div>
+      <div class="stat-info-summary">
+        <div class="stat-value-summary">{{ patients_no_med|length }}</div>
+        <div class="stat-label-summary">Sans traitement</div>
+      </div>
+    </div>
+    <div class="stat-summary-card">
+      <div class="stat-icon-summary">
+        <i class="fas fa-percentage"></i>
+      </div>
+      <div class="stat-info-summary">
+        <div class="stat-value-summary">{{ ((patients_no_med|length / patients|length) * 100)|round(1) if patients|length > 0 else 0 }}%</div>
+        <div class="stat-label-summary">Sans traitement</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="navigation-buttons">
+  <a href="{{ url_for('decision_support.dashboard', patient_id=patient.id) }}" class="btn btn-primary">
+    <i class="fas fa-chart-line"></i> Tableau de bord global
+  </a>
+</div>
+
+<script>
+function changePatient() {
+  const patientId = document.getElementById('patientSelect').value;
+  window.location.href = `{{ url_for('decision_support.traitement') }}?patient_id=${patientId}`;
+}
+</script>
+{% endblock %}

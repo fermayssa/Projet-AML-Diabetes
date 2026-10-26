@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - Clinique{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+  <h1><i class="fas fa-hospital-alt"></i> Bienvenue à la Clinique</h1>
+  <p>Système de gestion médicale moderne et efficace</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-users"></i></div>
+    <div class="stat-number">{{ patients_count }}</div>
+    <div class="stat-label">Patients</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+    <div class="stat-number">{{ rendez_vous_count }}</div>
+    <div class="stat-label">Rendez-vous</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+    <div class="stat-number">3</div>
+    <div class="stat-label">Médecins</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><i class="fas fa-heartbeat"></i></div>
+    <div class="stat-number">5</div>
+    <div class="stat-label">Services</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-calendar-alt"></i> Rendez-vous à venir</h2>
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Date</th>
+          <th>Heure</th>
+          <th>Type</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rdv in rendez_vous %}
+        <tr>
+          <td>{{ rdv.patient }}</td>
+          <td>{{ rdv.date }}</td>
+          <td>{{ rdv.heure }}</td>
+          <td>{{ rdv.type }}</td>
+          <td><span class="badge {{ rdv.statut|lower }}">{{ rdv.statut }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="text-center">
+    <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary"><i class="fas fa-list"></i> Voir tous les rendez-vous</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2><i class="fas fa-bolt"></i> Actions rapides</h2>
+  <div class="cards">
+    <a href="{{ url_for('clinique.nouveau_patient') }}" class="card action-card">
+      <div class="card-icon"><i class="fas fa-user-plus"></i></div>
+      <h3>Nouveau Patient</h3>
+      <p>Ajouter un nouveau patient au système</p>
+    </a>
+    <a href="{{ url_for('clinique.nouveau_rendez_vous') }}" class="card action-card">
+      <div class="card-icon"><i class="fas fa-calendar-plus"></i></div>
+      <h3>Prendre Rendez-vous</h3>
+      <p>Planifier un nouveau rendez-vous</p>
+    </a>
+    <a href="{{ url_for('clinique.patients') }}" class="card action-card">
+      <div class="card-icon"><i class="fas fa-address-book"></i></div>
+      <h3>Liste des Patients</h3>
+      <p>Consulter tous les patients</p>
+    </a>
+    <a href="{{ url_for('clinique.rendez_vous') }}" class="card action-card">
+      <div class="card-icon"><i class="fas fa-tasks"></i></div>
+      <h3>Gestion Rendez-vous</h3>
+      <p>Gérer les rendez-vous planifiés</p>
+    </a>
+  </div>
+</div>
+{% endblock %}

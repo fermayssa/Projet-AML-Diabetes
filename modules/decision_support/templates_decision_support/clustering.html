@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Profilage des Patients - Clustering{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-chart-pie"></i> Profilage des Patients</h1>
+  <a href="{{ url_for('decision_support.dashboard') }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+  </a>
+</div>
+
+<!-- Qualité des données -->
+<div class="data-quality-section">
+  <h3><i class="fas fa-database"></i> État de Qualité des Données</h3>
+  <div class="quality-card">
+    <div class="quality-score">
+      <div class="score-circle">
+        <div class="score-value">{{ data_quality_score }}</div>
+        <div class="score-label">/ 100</div>
+      </div>
+      <div class="score-status score-good">Bon</div>
+    </div>
+    <div class="quality-details">
+      <div class="quality-item">
+        <span class="quality-label">Complétude:</span>
+        <div class="quality-bar">
+          <div class="quality-fill" style="width: 92%"></div>
+        </div>
+        <span class="quality-value">92%</span>
+      </div>
+      <div class="quality-item">
+        <span class="quality-label">Validité:</span>
+        <div class="quality-bar">
+          <div class="quality-fill" style="width: 88%"></div>
+        </div>
+        <span class="quality-value">88%</span>
+      </div>
+      <div class="quality-item">
+        <span class="quality-label">Cohérence:</span>
+        <div class="quality-bar">
+          <div class="quality-fill" style="width: 85%"></div>
+        </div>
+        <span class="quality-value">85%</span>
+      </div>
+      <div class="quality-item">
+        <span class="quality-label">Normalisation:</span>
+        <div class="quality-bar">
+          <div class="quality-fill" style="width: 90%"></div>
+        </div>
+        <span class="quality-value">90%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clusters -->
+<div class="clusters-section">
+  <h3><i class="fas fa-users"></i> Segments de Patients ({{ clusters|length }} clusters)</h3>
+  <div class="clusters-grid">
+    {% for cluster in clusters %}
+    <div class="cluster-card">
+      <div class="cluster-header">
+        <div class="cluster-id">{{ cluster.id }}</div>
+        <h4>{{ cluster.nom }}</h4>
+      </div>
+      <p class="cluster-description">{{ cluster.description }}</p>
+      
+      <div class="cluster-stats-mini">
+        <div class="mini-stat">
+          <i class="fas fa-users"></i>
+          <span>{{ cluster.taille }}</span>
+        </div>
+        <div class="mini-stat">
+          <i class="fas fa-birthday-cake"></i>
+          <span>{{ cluster.caracteristiques.âge_moyen }} ans</span>
+        </div>
+        <div class="mini-stat">
+          <i class="fas fa-clock"></i>
+          <span>{{ cluster.caracteristiques.duree_sejour_moyenne }}j</span>
+        </div>
+      </div>
+
+      <div class="cluster-risk-indicators">
+        <div class="risk-indicator">
+          <span class="indicator-label">Réadmission</span>
+          <div class="risk-bar">
+            <div class="risk-fill {% if cluster.caracteristiques.readmission_rate|default(0) > 0.4 %}risk-high{% elif cluster.caracteristiques.readmission_rate|default(0) > 0.25 %}risk-medium{% else %}risk-low{% endif %}" 
+                 style="width: {{ (cluster.caracteristiques.readmission_rate|default(0) * 100) }}%">
+              {{ (cluster.caracteristiques.readmission_rate|default(0) * 100)|round(1) }}%
+            </div>
+          </div>
+        </div>
+        <div class="risk-indicator">
+          <span class="indicator-label">Changement tx</span>
+          <div class="risk-bar">
+            <div class="risk-fill {% if cluster.caracteristiques.change_rate|default(0) > 0.4 %}risk-high{% elif cluster.caracteristiques.change_rate|default(0) > 0.25 %}risk-medium{% else %}risk-low{% endif %}" 
+                 style="width: {{ (cluster.caracteristiques.change_rate|default(0) * 100) }}%">
+              {{ (cluster.caracteristiques.change_rate|default(0) * 100)|round(1) }}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cluster-conditions-mini">
+        <h5>Conditions:</h5>
+        <div class="conditions-tags-mini">
+          {% for condition in cluster.conditions_frequentes[:3] %}
+          <span class="condition-tag-mini">{{ condition }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button class="btn btn-sm btn-primary cluster-btn">
+        <i class="fas fa-eye"></i> Voir détails
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Recommandations par cluster -->
+<div class="recommendations-section">
+  <h3><i class="fas fa-lightbulb"></i> Recommandations par Profil</h3>
+  <div class="recommendations-grid">
+    <div class="recommendation-card">
+      <div class="rec-icon rec-high-risk">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h4>Patients à haut risque</h4>
+      <p>Clusters 1 et 3: Renforcer le suivi post-sortie, adapter le traitement, prévoir les ressources</p>
+    </div>
+    <div class="recommendation-card">
+      <div class="rec-icon rec-medium-risk">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <h4>Patients à risque moyen</h4>
+      <p>Cluster 2: Surveillance régulière, éducation thérapeutique</p>
+    </div>
+    <div class="recommendation-card">
+      <div class="rec-icon rec-low-risk">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h4>Patients stables</h4>
+      <p>Cluster 4: Maintenir le protocole actuel, suivi standard</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

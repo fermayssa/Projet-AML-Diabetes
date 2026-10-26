@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Prédiction Réadmission - Aide à la Décision{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-redo"></i> Prédiction du Risque de Réadmission</h1>
+  <div class="patient-selector">
+    <select id="patientSelect" onchange="changePatient()">
+      {% for p in patients %}
+      <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
+        {{ p.prenom }} {{ p.nom }} ({{ p.age }} ans)
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- Patient Info -->
+<div class="patient-info-card">
+  <div class="patient-header-mini">
+    <div class="patient-avatar-small">
+      <i class="fas fa-user"></i>
+    </div>
+    <div>
+      <h3>{{ patient.prenom }} {{ patient.nom }}</h3>
+      <p class="patient-meta-mini">{{ patient.age }} ans • {{ patient.admission_type }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Résultat de prédiction -->
+<div class="prediction-result-section">
+  <div class="prediction-main {% if patient.readmitted_risk|default(0) > 0.5 %}prediction-high{% elif patient.readmitted_risk|default(0) > 0.3 %}prediction-medium{% else %}prediction-low{% endif %}">
+    <div class="prediction-gauge-large">
+      <div class="gauge-container-large">
+        <div class="gauge-fill-large {% if patient.readmitted_risk|default(0) > 0.5 %}gauge-danger{% elif patient.readmitted_risk|default(0) > 0.3 %}gauge-warning{% else %}gauge-success{% endif %}" 
+             style="width: {{ (patient.readmitted_risk|default(0) * 100) }}%">
+        </div>
+        <div class="gauge-value-large">{{ (patient.readmitted_risk|default(0) * 100)|round(1) }}%</div>
+      </div>
+    </div>
+    <div class="prediction-verdict">
+      <h4>Prédiction: Réadmission à 30 jours</h4>
+      <div class="verdict-badge {% if patient.readmitted_risk|default(0) > 0.5 %}verdict-yes{% else %}verdict-no{% endif %}">
+        {% if patient.readmitted_risk|default(0) > 0.5 %}
+        <i class="fas fa-exclamation-circle"></i> OUI - Risque élevé
+        {% else %}
+        <i class="fas fa-check-circle"></i> NON - Risque faible
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Facteurs explicatifs -->
+<div class="factors-section">
+  <h3><i class="fas fa-chart-bar"></i> Facteurs Explicatifs</h3>
+  <p class="section-desc">Ces facteurs contribuent le plus à la prédiction du risque de réadmission</p>
+  
+  <div class="factors-list">
+    {% for factor in factors %}
+    <div class="factor-item">
+      <div class="factor-info">
+        <span class="factor-name">{{ factor.name }}</span>
+        <span class="factor-value">{{ factor.value }}</span>
+      </div>
+      <div class="factor-importance">
+        <div class="importance-bar">
+          <div class="importance-fill" style="width: {{ (factor.importance * 100) }}%"></div>
+        </div>
+        <span class="importance-value">{{ (factor.importance * 100)|round(1) }}%</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Recommandations -->
+<div class="recommendations-box">
+  <h3><i class="fas fa-lightbulb"></i> Recommandations</h3>
+  <div class="rec-content {% if patient.readmitted_risk|default(0) > 0.5 %}rec-high-risk{% else %}rec-low-risk{% endif %}">
+    {% if patient.readmitted_risk|default(0) > 0.5 %}
+    <ul>
+      <li><i class="fas fa-check"></i> Planifier un suivi rapproché dans les 7 jours post-sortie</li>
+      <li><i class="fas fa-check"></i> Vérifier l'observance du traitement avant la sortie</li>
+      <li><i class="fas fa-check"></i> Assurer l'éducation thérapeutique du patient</li>
+      <li><i class="fas fa-check"></i> Coordonner avec les services de soins à domicile</li>
+      <li><i class="fas fa-check"></i> Prévenir le médecin traitant du risque de réadmission</li>
+    </ul>
+    {% else %}
+    <ul>
+      <li><i class="fas fa-check"></i> Suivi standard recommandé</li>
+      <li><i class="fas fa-check"></i> Maintenir le protocole actuel</li>
+      <li><i class="fas fa-check"></i> Consultation de routine à 30 jours</li>
+    </ul>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Historique -->
+<div class="history-section">
+  <h3><i class="fas fa-history"></i> Historique des Réadmissions</h3>
+  <div class="history-placeholder">
+    <p>Aucun historique de réadmission disponible pour ce patient.</p>
+  </div>
+</div>
+
+<div class="navigation-buttons">
+  <a href="{{ url_for('decision_support.dashboard', patient_id=patient.id) }}" class="btn btn-primary">
+    <i class="fas fa-chart-line"></i> Tableau de bord global
+  </a>
+</div>
+
+<script>
+function changePatient() {
+  const patientId = document.getElementById('patientSelect').value;
+  window.location.href = `{{ url_for('decision_support.readmission') }}?patient_id=${patientId}`;
+}
+</script>
+{% endblock %}

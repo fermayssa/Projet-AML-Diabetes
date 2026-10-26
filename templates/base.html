@@ -4,11 +4,857 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Projet AML - Patients diabétiques{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .sidebar {
+      background: linear-gradient(180deg, #4c1d95 0%, #7c3aed 100%);
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .sidebar-brand {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-brand:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(4px);
+    }
+    
+    .sidebar-brand span {
+      color: #fff;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-section-title {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 16px 20px 8px;
+    }
+    
+    .nav-item {
+      color: rgba(255, 255, 255, 0.85);
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 4px 12px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      transform: translateX(4px);
+    }
+    
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
+    
+    .nav-item span {
+      font-weight: 500;
+    }
+    
+    .nav-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 12px 20px;
+    }
+    
+    .user-info {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 12px;
+    }
+    
+    .user-avatar {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-avatar i {
+      color: #fff;
+      font-size: 18px;
+    }
+    
+    .user-name {
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .user-role {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+    
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin: 12px;
+      transition: all 0.2s ease;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Chatbot Styles */
+    .chatbot-button {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .chatbot-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
+    }
+    
+    .chatbot-button i {
+      color: #fff;
+      font-size: 24px;
+    }
+    
+    .chatbot-window {
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      width: 350px;
+      height: 450px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .chatbot-window.active {
+      display: flex;
+    }
+    
+    .chatbot-header {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      color: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .chatbot-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .chatbot-close {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 20px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    
+    .chatbot-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .chatbot-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: #faf5ff;
+    }
+    
+    .chatbot-message {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chatbot-message.bot {
+      align-items: flex-start;
+    }
+    
+    .chatbot-message.user {
+      align-items: flex-end;
+    }
+    
+    .chatbot-bubble {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    .chatbot-message.bot .chatbot-bubble {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .chatbot-message.user .chatbot-bubble {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .chatbot-input-area {
+      padding: 16px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 8px;
+      background: #fff;
+    }
+    
+    .chatbot-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .chatbot-input:focus {
+      border-color: #8b5cf6;
+    }
+    
+    .chatbot-send {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .chatbot-send:hover {
+      transform: scale(1.05);
+    }
+  </style>
 </head>
 <body>
-  <header><a class="brand" href="{{ url_for('home') }}">Projet AML · Patients diabétiques</a></header>
-  <main>{% block content %}{% endblock %}</main>
-  <footer>Démonstration pédagogique - ne constitue pas un avis médical.</footer>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="{{ url_for('home') }}" class="sidebar-brand">
+          <img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" class="sidebar-logo">
+          <span>GlycoFlow</span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('home') }}" class="nav-item">
+          <i class="fas fa-home"></i>
+          <span>Accueil</span>
+        </a>
+        <div class="nav-divider"></div>
+        <div class="nav-section-title">Clinique</div>
+        <a href="{{ url_for('clinique.accueil') }}" class="nav-item">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard Clinique</span>
+        </a>
+        <a href="{{ url_for('clinique.patients') }}" class="nav-item">
+          <i class="fas fa-users"></i>
+          <span>Patients</span>
+        </a>
+        <a href="{{ url_for('clinique.rendez_vous') }}" class="nav-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Rendez-vous</span>
+        </a>
+        <div class="nav-divider"></div>
+        <div class="nav-section-title">Aide à la Décision</div>
+        <a href="{{ url_for('decision_support.dashboard') }}" class="nav-item">
+          <i class="fas fa-th-large"></i>
+          <span>Tableau de Bord</span>
+        </a>
+        <a href="{{ url_for('decision_support.clustering') }}" class="nav-item">
+          <i class="fas fa-chart-pie"></i>
+          <span>Profilage Patients</span>
+        </a>
+        <a href="{{ url_for('decision_support.readmission') }}" class="nav-item">
+          <i class="fas fa-redo"></i>
+          <span>Risque Réadmission</span>
+        </a>
+        <a href="{{ url_for('decision_support.instabilite') }}" class="nav-item">
+          <i class="fas fa-pills"></i>
+          <span>Instabilité Tx</span>
+        </a>
+        <a href="{{ url_for('decision_support.traitement') }}" class="nav-item">
+          <i class="fas fa-prescription-bottle-alt"></i>
+          <span>Traitement</span>
+        </a>
+        <a href="{{ url_for('decision_support.duree_sejour') }}" class="nav-item">
+          <i class="fas fa-clock"></i>
+          <span>Durée Séjour</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="#" class="nav-item">
+          <i class="fas fa-cog"></i>
+          <span>Paramètres</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-question-circle"></i>
+          <span>Aide</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        {% if session.user %}
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-details">
+            <span class="user-name">{{ session.user.username }}</span>
+            <span class="user-role">{{ session.user.role|capitalize }}</span>
+          </div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Déconnexion</span>
+        </a>
+        {% else %}
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-details">
+            <span class="user-name">Non connecté</span>
+            <span class="user-role">Visiteur</span>
+          </div>
+        </div>
+        <a href="{{ url_for('login') }}" class="logout-btn">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Connexion</span>
+        </a>
+        {% endif %}
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="top-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Rechercher patients, rendez-vous...">
+            <div id="searchResults" class="search-results"></div>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="header-btn notification-btn">
+            <i class="fas fa-bell"></i>
+            <span class="badge">3</span>
+          </button>
+          <button class="header-btn">
+            <i class="fas fa-envelope"></i>
+            <span class="badge">5</span>
+          </button>
+          <div class="header-divider"></div>
+        </div>
+      </header>
+
+      <main>{% block content %}{% endblock %}</main>
+
+      <footer class="main-footer">
+        <div class="footer-content">
+          <p>&copy; 2026 GlycoFlow - Tous droits réservés</p>
+          <div class="footer-links">
+            <a href="#">Politique de confidentialité</a>
+            <a href="#">Conditions d'utilisation</a>
+            <a href="#">Support</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Toggle sidebar
+    document.getElementById('menuToggle').addEventListener('click', function() {
+      document.querySelector('.app-container').classList.toggle('sidebar-collapsed');
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      const query = this.value.trim();
+      
+      if (query.length < 2) {
+        searchResults.style.display = 'none';
+        return;
+      }
+      
+      searchTimeout = setTimeout(() => {
+        fetch(`/search?q=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => {
+            displaySearchResults(data);
+          })
+          .catch(error => console.error('Erreur de recherche:', error));
+      }, 300);
+    });
+
+    function displaySearchResults(data) {
+      let html = '';
+      
+      if (data.patients && data.patients.length > 0) {
+        html += '<div class="search-section"><h4>Patients</h4>';
+        data.patients.forEach(patient => {
+          html += `<a href="/clinique/patients/${patient.id}" class="search-item">
+            <i class="fas fa-user"></i>
+            <span>${patient.nom} ${patient.prenom} (${patient.age} ans)</span>
+          </a>`;
+        });
+        html += '</div>';
+      }
+      
+      if (data.rendez_vous && data.rendez_vous.length > 0) {
+        html += '<div class="search-section"><h4>Rendez-vous</h4>';
+        data.rendez_vous.forEach(rd => {
+          html += `<a href="/clinique/rendez-vous" class="search-item">
+            <i class="fas fa-calendar"></i>
+            <span>${rd.nom} ${rd.prenom} - ${rd.date}</span>
+          </a>`;
+        });
+        html += '</div>';
+      }
+      
+      if (!html) {
+        html = '<div class="search-empty">Aucun résultat trouvé</div>';
+      }
+      
+      searchResults.innerHTML = html;
+      searchResults.style.display = 'block';
+    }
+
+    // Hide search results when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.style.display = 'none';
+      }
+    });
+
+    // Chatbot functionality
+    const chatbotButton = document.createElement('div');
+    chatbotButton.className = 'chatbot-button';
+    chatbotButton.innerHTML = '<i class="fas fa-comments"></i>';
+    document.body.appendChild(chatbotButton);
+
+    const chatbotWindow = document.createElement('div');
+    chatbotWindow.className = 'chatbot-window';
+    chatbotWindow.innerHTML = `
+      <div class="chatbot-header">
+        <h3><i class="fas fa-robot"></i> Assistant GlycoFlow</h3>
+        <button class="chatbot-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="chatbot-messages">
+        <div class="chatbot-message bot">
+          <div class="chatbot-bubble">Bonjour ! Je suis votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?</div>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <input type="text" class="chatbot-input" placeholder="Tapez votre message...">
+        <button class="chatbot-send"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    `;
+    document.body.appendChild(chatbotWindow);
+
+    const chatbotClose = chatbotWindow.querySelector('.chatbot-close');
+    const chatbotInput = chatbotWindow.querySelector('.chatbot-input');
+    const chatbotSend = chatbotWindow.querySelector('.chatbot-send');
+    const chatbotMessages = chatbotWindow.querySelector('.chatbot-messages');
+
+    let historyLoaded = false;
+
+    function loadChatHistory() {
+      fetch('/chatbot/history')
+        .then(response => response.json())
+        .then(data => {
+          if (!historyLoaded && data.messages && data.messages.length > 0) {
+            chatbotMessages.innerHTML = '';
+            data.messages.forEach(msg => {
+              addMessage(msg.message, msg.role === 'user');
+            });
+            historyLoaded = true;
+          } else if (!historyLoaded) {
+            chatbotMessages.innerHTML = `
+              <div class="chatbot-message bot">
+                <div class="chatbot-bubble">Bonjour ! Je suis votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?</div>
+              </div>
+            `;
+            historyLoaded = true;
+          }
+        })
+        .catch(error => {
+          console.error('Erreur lors du chargement de l\'historique:', error);
+        });
+    }
+
+    // Charger l'historique au démarrage de la page
+    loadChatHistory();
+
+    chatbotButton.addEventListener('click', function() {
+      chatbotWindow.classList.toggle('active');
+    });
+
+    chatbotClose.addEventListener('click', function() {
+      chatbotWindow.classList.remove('active');
+    });
+
+    function addMessage(text, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chatbot-message ${isUser ? 'user' : 'bot'}`;
+      messageDiv.innerHTML = `<div class="chatbot-bubble">${text}</div>`;
+      chatbotMessages.appendChild(messageDiv);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function getBotResponse(userMessage) {
+      const lowerMessage = userMessage.toLowerCase();
+      
+      if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut')) {
+        return 'Bonjour ! Je suis votre assistant virtuel. Je peux vous aider à :\n\n• Naviguer dans l\'application\n• Ajouter un patient\n• Créer un rendez-vous\n• Accéder aux outils d\'aide à la décision\n• Consulter les statistiques\n\nQue souhaitez-vous faire ?';
+      } else if (lowerMessage.includes('accueil') || lowerMessage.includes('home') || lowerMessage.includes('dashboard')) {
+        navigateTo('/app');
+        return 'Redirection vers le tableau de bord...';
+      } else if (lowerMessage.includes('clinique')) {
+        navigateTo('/clinique');
+        return 'Redirection vers le module Clinique...';
+      } else if (lowerMessage.includes('patients') && !lowerMessage.includes('ajouter') && !lowerMessage.includes('nouveau') && !lowerMessage.includes('créer')) {
+        navigateTo('/clinique/patients');
+        return 'Redirection vers la liste des patients...';
+      } else if (lowerMessage.includes('ajouter patient') || lowerMessage.includes('nouveau patient') || lowerMessage.includes('créer patient')) {
+        showPatientForm();
+        return null;
+      } else if (lowerMessage.includes('rendez-vous') && !lowerMessage.includes('créer') && !lowerMessage.includes('nouveau') && !lowerMessage.includes('ajouter')) {
+        navigateTo('/clinique/rendez-vous');
+        return 'Redirection vers la liste des rendez-vous...';
+      } else if (lowerMessage.includes('rendez-vous') && (lowerMessage.includes('créer') || lowerMessage.includes('nouveau') || lowerMessage.includes('ajouter'))) {
+        showRendezVousForm();
+        return null;
+      } else if (lowerMessage.includes('aide à la décision') || lowerMessage.includes('decision support') || lowerMessage.includes('prediction')) {
+        navigateTo('/decision-support/dashboard');
+        return 'Redirection vers le tableau de bord d\'aide à la décision...';
+      } else if (lowerMessage.includes('profilage') || lowerMessage.includes('clustering') || lowerMessage.includes('cluster')) {
+        navigateTo('/decision-support/clustering');
+        return 'Redirection vers le profilage des patients...';
+      } else if (lowerMessage.includes('réadmission') || lowerMessage.includes('readmission') || lowerMessage.includes('risque')) {
+        navigateTo('/decision-support/readmission');
+        return 'Redirection vers l\'analyse de risque de réadmission...';
+      } else if (lowerMessage.includes('instabilité') || lowerMessage.includes('traitement') || lowerMessage.includes('changement')) {
+        navigateTo('/decision-support/instabilite');
+        return 'Redirection vers l\'analyse d\'instabilité thérapeutique...';
+      } else if (lowerMessage.includes('durée') || lowerMessage.includes('séjour') || lowerMessage.includes('hospitalisation')) {
+        navigateTo('/decision-support/duree_sejour');
+        return 'Redirection vers la prédiction de durée de séjour...';
+      } else if (lowerMessage.includes('traitement') && lowerMessage.includes('sans')) {
+        navigateTo('/decision-support/traitement');
+        return 'Redirection vers l\'identification des patients sans traitement...';
+      } else if (lowerMessage.includes('statistiques') || lowerMessage.includes('stats')) {
+        navigateTo('/clinique');
+        return 'Redirection vers les statistiques...';
+      } else if (lowerMessage.includes('déconnexion') || lowerMessage.includes('logout') || lowerMessage.includes('quitter')) {
+        navigateTo('/logout');
+        return 'Déconnexion...';
+      } else if (lowerMessage.includes('patient')) {
+        return 'Pour les patients, vous pouvez :\n• Tapez "patients" pour voir la liste\n• Tapez "ajouter patient" pour en créer un nouveau\n• Tapez "clinique" pour accéder au module';
+      } else if (lowerMessage.includes('diabète') || lowerMessage.includes('diabetes')) {
+        return 'Notre application aide à la gestion du diabète grâce à des outils d\'aide à la décision basés sur l\'apprentissage automatique. Tapez "aide à la décision" pour y accéder.';
+      } else if (lowerMessage.includes('aide') || lowerMessage.includes('help')) {
+        return 'Je peux vous aider à naviguer dans toute l\'application ! Tapez :\n• "accueil" pour le tableau de bord\n• "clinique" pour le module clinique\n• "patients" pour la liste des patients\n• "rendez-vous" pour les rendez-vous\n• "aide à la décision" pour les outils ML\n• "profilage" pour le clustering\n• "réadmission" pour le risque de réadmission\n• "durée séjour" pour la prédiction de séjour\n• "traitement" pour l\'analyse thérapeutique';
+      } else if (lowerMessage.includes('merci')) {
+        return 'Je vous en prie ! N\'hésitez pas si vous avez d\'autres questions.';
+      } else {
+        return 'Je ne suis pas sûr de comprendre. Tapez "aide" pour voir ce que je peux faire.';
+      }
+    }
+
+    function navigateTo(url) {
+      setTimeout(() => {
+        window.location.href = url;
+      }, 1000);
+    }
+
+    function showPatientForm() {
+      const formHtml = `
+        <div class="chatbot-message bot">
+          <div class="chatbot-bubble">
+            <strong>Ajouter un nouveau patient</strong><br><br>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Nom:</label>
+              <input type="text" id="patientNom" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Prénom:</label>
+              <input type="text" id="patientPrenom" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Âge:</label>
+              <input type="number" id="patientAge" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Sexe:</label>
+              <select id="patientSexe" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                <option value="M">Masculin</option>
+                <option value="F">Féminin</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Téléphone:</label>
+              <input type="text" id="patientTelephone" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Email:</label>
+              <input type="email" id="patientEmail" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #666;">Type de diabète:</label>
+              <select id="patientDiabetesType" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                <option value="Type 1">Type 1</option>
+                <option value="Type 2">Type 2</option>
+                <option value="Gestational">Gestationnel</option>
+                <option value="Other">Autre</option>
+              </select>
+            </div>
+            <button onclick="submitPatientForm()" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 8px;">Enregistrer</button>
+          </div>
+        </div>
+      `;
+      chatbotMessages.insertAdjacentHTML('beforeend', formHtml);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function submitPatientForm() {
+      const nom = document.getElementById('patientNom').value;
+      const prenom = document.getElementById('patientPrenom').value;
+      const age = document.getElementById('patientAge').value;
+      const sexe = document.getElementById('patientSexe').value;
+      const telephone = document.getElementById('patientTelephone').value;
+      const email = document.getElementById('patientEmail').value;
+      const diabetes_type = document.getElementById('patientDiabetesType').value;
+
+      if (!nom || !prenom || !age) {
+        addMessage('Veuillez remplir au moins le nom, prénom et l\'âge.', false);
+        return;
+      }
+
+      const formData = new FormData();
+ formData.append('nom', nom);
+      formData.append('prenom', prenom);
+      formData.append('age', age);
+      formData.append('sexe', sexe);
+      formData.append('telephone', telephone);
+      formData.append('email', email);
+      formData.append('diabetes_type', diabetes_type);
+
+      fetch('/clinique/patients/add', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.redirected ? window.location.href = response.url : response.json())
+      .then(data => {
+        addMessage(`Patient ${nom} ${prenom} ajouté avec succès !`, false);
+        setTimeout(() => {
+          window.location.href = '/clinique/patients';
+        }, 1500);
+      })
+      .catch(error => {
+        addMessage('Erreur lors de l\'ajout du patient. Veuillez réessayer.', false);
+      });
+    }
+
+    function showRendezVousForm() {
+      fetch('/clinique/patients')
+        .then(response => response.json())
+        .then(patients => {
+          let patientOptions = '<option value="">Sélectionner un patient</option>';
+          patients.forEach(p => {
+            patientOptions += `<option value="${p.id}">${p.prenom} ${p.nom}</option>`;
+          });
+
+          const formHtml = `
+            <div class="chatbot-message bot">
+              <div class="chatbot-bubble">
+                <strong>Créer un nouveau rendez-vous</strong><br><br>
+                <div style="margin-bottom: 8px;">
+                  <label style="font-size: 12px; color: #666;">Patient:</label>
+                  <select id="rdvPatient" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                    ${patientOptions}
+                  </select>
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <label style="font-size: 12px; color: #666;">Date:</label>
+                  <input type="datetime-local" id="rdvDate" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <label style="font-size: 12px; color: #666;">Durée (minutes):</label>
+                  <input type="number" id="rdvDuree" value="30" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <label style="font-size: 12px; color: #666;">Type:</label>
+                  <select id="rdvType" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                    <option value="consultation">Consultation</option>
+                    <option value="suivi">Suivi</option>
+                    <option value="examen">Examen</option>
+                    <option value="urgence">Urgence</option>
+                  </select>
+                </div>
+                <div style="margin-bottom: 8px;">
+                  <label style="font-size: 12px; color: #666;">Motif:</label>
+                  <textarea id="rdvMotif" rows="2" style="width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #e5e7eb; border-radius: 4px;"></textarea>
+                </div>
+                <button onclick="submitRendezVousForm()" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 8px;">Enregistrer</button>
+              </div>
+            </div>
+          `;
+          chatbotMessages.insertAdjacentHTML('beforeend', formHtml);
+          chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        })
+        .catch(error => {
+          addMessage('Erreur lors du chargement des patients. Veuillez réessayer.', false);
+        });
+    }
+
+    function submitRendezVousForm() {
+      const patient_id = document.getElementById('rdvPatient').value;
+      const date = document.getElementById('rdvDate').value;
+      const duree = document.getElementById('rdvDuree').value;
+      const type_rdv = document.getElementById('rdvType').value;
+      const motif = document.getElementById('rdvMotif').value;
+
+      if (!patient_id || !date) {
+        addMessage('Veuillez sélectionner un patient et une date.', false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('patient_id', patient_id);
+      formData.append('date', date);
+      formData.append('duree', duree);
+      formData.append('type_rdv', type_rdv);
+      formData.append('motif', motif);
+
+      fetch('/clinique/rendez-vous/add', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          addMessage('Rendez-vous créé avec succès !', false);
+          setTimeout(() => {
+            window.location.href = '/clinique/rendez-vous';
+          }, 1500);
+        } else {
+          addMessage('Erreur lors de la création du rendez-vous.', false);
+        }
+      })
+      .catch(error => {
+        addMessage('Erreur lors de la création du rendez-vous. Veuillez réessayer.', false);
+      });
+    }
+
+    function sendMessage() {
+      const text = chatbotInput.value.trim();
+      if (text) {
+        addMessage(text, true);
+        chatbotInput.value = '';
+        
+        // Envoyer à l'API Groq
+        fetch('/chatbot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: text })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.action) {
+            // Gérer les actions spéciales - afficher le message puis le formulaire
+            if (data.action === 'ajouter_patient') {
+              addMessage('Pour ajouter un patient, veuillez remplir le formulaire ci-dessous :', false);
+              showPatientForm();
+            } else if (data.action === 'creer_rendez_vous') {
+              addMessage('Pour créer un rendez-vous, veuillez remplir le formulaire ci-dessous :', false);
+              showRendezVousForm();
+            }
+          } else if (data.navigate) {
+            // Naviguer vers une page
+            addMessage(data.message || 'Redirection...', false);
+            setTimeout(() => {
+              window.location.href = data.navigate;
+            }, 1000);
+          } else if (data.message) {
+            // Afficher le message du bot
+            addMessage(data.message, false);
+          } else if (data.error) {
+            addMessage('Erreur: ' + data.error, false);
+          }
+        })
+        .catch(error => {
+          addMessage('Erreur de connexion. Utilisation du mode hors ligne.', false);
+          // Fallback aux réponses prédéfinies
+          const fallbackResponse = getBotResponse(text);
+          if (fallbackResponse) {
+            addMessage(fallbackResponse, false);
+          }
+        });
+      }
+    }
+
+    chatbotSend.addEventListener('click', sendMessage);
+    chatbotInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
 </body>
 </html>

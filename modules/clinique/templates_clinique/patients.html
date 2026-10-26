@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Patients - Clinique{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-users"></i> Liste des Patients</h1>
+  <button id="toggleFormBtn" class="btn btn-primary"><i class="fas fa-user-plus"></i> Nouveau Patient</button>
+</div>
+
+<!-- Formulaire d'ajout de patient (caché par défaut) -->
+<div id="patientFormContainer" style="display: none;">
+  <div class="form-card">
+    <div class="form-header">
+      <h2><i class="fas fa-user-plus"></i> Ajouter un nouveau patient</h2>
+      <button id="closeFormBtn" class="btn-close"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="addPatientForm" method="POST" action="{{ url_for('clinique.add_patient') }}">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nom">Nom *</label>
+          <input type="text" id="nom" name="nom" required>
+        </div>
+        <div class="form-group">
+          <label for="prenom">Prénom *</label>
+          <input type="text" id="prenom" name="prenom" required>
+        </div>
+        <div class="form-group">
+          <label for="age">Âge *</label>
+          <input type="number" id="age" name="age" required>
+        </div>
+        <div class="form-group">
+          <label for="sexe">Sexe *</label>
+          <select id="sexe" name="sexe" required>
+            <option value="">Sélectionner</option>
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="telephone">Téléphone</label>
+          <input type="tel" id="telephone" name="telephone">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email">
+        </div>
+        <div class="form-group">
+          <label for="adresse">Adresse</label>
+          <input type="text" id="adresse" name="adresse">
+        </div>
+        <div class="form-group">
+          <label for="diabetes_type">Type de diabète</label>
+          <select id="diabetes_type" name="diabetes_type">
+            <option value="">Non spécifié</option>
+            <option value="Type 1">Type 1</option>
+            <option value="Type 2">Type 2</option>
+            <option value="Gestational">Gestationnel</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        <button type="button" id="cancelFormBtn" class="btn btn-secondary">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Liste des patients -->
+<div id="patientsList">
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Âge</th>
+          <th>Téléphone</th>
+          <th>Email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for patient in patients %}
+        <tr>
+          <td>{{ patient.id }}</td>
+          <td>{{ patient.nom }}</td>
+          <td>{{ patient.prenom }}</td>
+          <td>{{ patient.age }}</td>
+          <td>{{ patient.telephone }}</td>
+          <td>{{ patient.email }}</td>
+          <td>
+            <a href="{{ url_for('clinique.patient_detail', patient_id=patient.id) }}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> Voir</a>
+            <a href="{{ url_for('clinique.edit_patient', patient_id=patient.id) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Modifier</a>
+            <form method="POST" action="{{ url_for('clinique.delete_patient', patient_id=patient.id) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce patient ?');">
+              <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <span class="pagination-info">Affichage 1-{{ patients|length }} sur {{ patients|length }} patients</span>
+  </div>
+</div>
+
+<script>
+  const toggleFormBtn = document.getElementById('toggleFormBtn');
+  const closeFormBtn = document.getElementById('closeFormBtn');
+  const cancelFormBtn = document.getElementById('cancelFormBtn');
+  const patientFormContainer = document.getElementById('patientFormContainer');
+  const patientsList = document.getElementById('patientsList');
+
+  toggleFormBtn.addEventListener('click', function() {
+    patientFormContainer.style.display = 'block';
+    patientsList.style.display = 'none';
+    toggleFormBtn.style.display = 'none';
+  });
+
+  closeFormBtn.addEventListener('click', function() {
+    patientFormContainer.style.display = 'none';
+    patientsList.style.display = 'block';
+    toggleFormBtn.style.display = 'inline-block';
+  });
+
+  cancelFormBtn.addEventListener('click', function() {
+    patientFormContainer.style.display = 'none';
+    patientsList.style.display = 'block';
+    toggleFormBtn.style.display = 'inline-block';
+    document.getElementById('addPatientForm').reset();
+  });
+
+  // Après soumission réussie, revenir à la liste
+  document.getElementById('addPatientForm').addEventListener('submit', function(e) {
+    // Le formulaire sera soumis normalement
+  });
+</script>
+{% endblock %}

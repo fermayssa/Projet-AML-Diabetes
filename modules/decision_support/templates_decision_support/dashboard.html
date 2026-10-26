@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de Bord - Aide à la Décision{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-chart-line"></i> Tableau de Bord Global</h1>
+  <div class="patient-selector">
+    <select id="patientSelect" onchange="changePatient()">
+      {% for p in patients %}
+      <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
+        {{ p.prenom }} {{ p.nom }} ({{ p.age }} ans)
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- Fiche Patient -->
+<div class="patient-card">
+  <div class="patient-header">
+    <div class="patient-avatar-large">
+      <i class="fas fa-user"></i>
+    </div>
+    <div class="patient-info">
+      <h2>{{ patient.prenom }} {{ patient.nom }}</h2>
+      <p class="patient-meta">
+        <span><i class="fas fa-birthday-cake"></i> {{ patient.age or 'N/A' }} ans</span>
+        <span><i class="fas fa-venus-mars"></i> {{ patient.sexe or 'N/A' }}</span>
+      </p>
+    </div>
+    <div class="patient-cluster">
+      <span class="cluster-badge">Cluster {{ patient.cluster_id or 'N/A' }}</span>
+      <p class="cluster-name">{{ cluster.nom or 'Non assigné' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Alertes et Recommandations -->
+<div class="alerts-section">
+  <h3><i class="fas fa-exclamation-triangle"></i> Alertes et Recommandations</h3>
+  <div class="alerts-grid">
+    {% if patient.readmitted_risk and patient.readmitted_risk > 0.7 %}
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-circle"></i>
+      <strong>Risque élevé de réadmission</strong>
+      <p>Score: {{ (patient.readmitted_risk * 100)|round(1) }}% - Préparer un suivi rapproché</p>
+    </div>
+    {% endif %}
+    {% if patient.change_risk and patient.change_risk > 0.7 %}
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      <strong>Instabilité thérapeutique probable</strong>
+      <p>Score: {{ (patient.change_risk * 100)|round(1) }}% - Adapter le protocole avant sortie</p>
+    </div>
+    {% endif %}
+    {% if patient.diabetes_med == 'No' %}
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i>
+      <strong>Pas de traitement médicamenteux</strong>
+      <p>Patient géré par régime/hygiène de vie - Surveillance recommandée</p>
+    </div>
+    {% endif %}
+    {% if patient.time_in_hospital and patient.time_in_hospital|default(0) > 7 %}
+    <div class="alert alert-warning">
+      <i class="fas fa-clock"></i>
+      <strong>Séjour prolongé prévu</strong>
+      <p>{{ patient.time_in_hospital }} jours - Anticiper la planification des ressources</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Résultats des Modèles -->
+<div class="models-grid">
+  <!-- Réadmission -->
+  <div class="model-card {% if patient.readmitted_risk and patient.readmitted_risk > 0.5 %}risk-high{% elif patient.readmitted_risk and patient.readmitted_risk > 0.3 %}risk-medium{% else %}risk-low{% endif %}">
+    <div class="model-header">
+      <i class="fas fa-redo"></i>
+      <h3>Risque de Réadmission</h3>
+    </div>
+    <div class="model-gauge">
+      <div class="gauge-container">
+        <div class="gauge-fill" style="width: {{ (patient.readmitted_risk * 100) if patient.readmitted_risk else 0 }}%"></div>
+        <div class="gauge-value">{{ ((patient.readmitted_risk * 100)|round(1)) if patient.readmitted_risk else 'N/A' }}%</div>
+      </div>
+    </div>
+    <div class="model-prediction">
+      <span class="prediction-label">Prédiction:</span>
+      <span class="prediction-value {% if patient.readmitted_risk and patient.readmitted_risk > 0.5 %}text-danger{% else %}text-success{% endif %}">
+        {% if not patient.readmitted_risk %}Non disponible{% elif patient.readmitted_risk > 0.5 %}OUI (< 30 jours){% else %}NON{% endif %}
+      </span>
+    </div>
+    <a href="{{ url_for('decision_support.readmission', patient_id=patient.id) }}" class="btn btn-sm btn-secondary">
+      <i class="fas fa-chart-bar"></i> Détails
+    </a>
+  </div>
+
+  <!-- Instabilité Thérapeutique -->
+  <div class="model-card {% if patient.change_risk and patient.change_risk > 0.5 %}risk-high{% elif patient.change_risk and patient.change_risk > 0.3 %}risk-medium{% else %}risk-low{% endif %}">
+    <div class="model-header">
+      <i class="fas fa-pills"></i>
+      <h3>Instabilité Thérapeutique</h3>
+    </div>
+    <div class="model-gauge">
+      <div class="gauge-container">
+        <div class="gauge-fill" style="width: {{ (patient.change_risk * 100) if patient.change_risk else 0 }}%"></div>
+        <div class="gauge-value">{{ ((patient.change_risk * 100)|round(1)) if patient.change_risk else 'N/A' }}%</div>
+      </div>
+    </div>
+    <div class="model-prediction">
+      <span class="prediction-label">Prédiction:</span>
+      <span class="prediction-value {% if patient.change_risk and patient.change_risk > 0.5 %}text-danger{% else %}text-success{% endif %}">
+        {% if not patient.change_risk %}Non disponible{% elif patient.change_risk > 0.5 %}Changement probable{% else %}Traitement stable{% endif %}
+      </span>
+    </div>
+    <a href="{{ url_for('decision_support.instabilite', patient_id=patient.id) }}" class="btn btn-sm btn-secondary">
+      <i class="fas fa-chart-bar"></i> Détails
+    </a>
+  </div>
+
+  <!-- Traitement Antidiabétique -->
+  <div class="model-card {% if patient.diabetes_med == 'No' %}risk-high{% else %}risk-low{% endif %}">
+    <div class="model-header">
+      <i class="fas fa-prescription-bottle-alt"></i>
+      <h3>Traitement Antidiabétique</h3>
+    </div>
+    <div class="model-status">
+      <div class="status-icon {% if patient.diabetes_med == 'Yes' %}status-yes{% else %}status-no{% endif %}">
+        <i class="fas {% if patient.diabetes_med == 'Yes' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+      </div>
+      <div class="status-value">{{ patient.diabetes_med }}</div>
+    </div>
+    <div class="model-prediction">
+      <span class="prediction-label">Statut:</span>
+      <span class="prediction-value">
+        {% if patient.diabetes_med == 'Yes' %}Sous traitement{% else %}Sans traitement médicamenteux{% endif %}
+      </span>
+    </div>
+    <a href="{{ url_for('decision_support.traitement', patient_id=patient.id) }}" class="btn btn-sm btn-secondary">
+      <i class="fas fa-chart-bar"></i> Détails
+    </a>
+  </div>
+
+  <!-- Durée de Séjour -->
+  <div class="model-card {% if patient.time_in_hospital and patient.time_in_hospital|default(0) > 7 %}risk-high{% elif patient.time_in_hospital and patient.time_in_hospital|default(0) > 4 %}risk-medium{% else %}risk-low{% endif %}">
+    <div class="model-header">
+      <i class="fas fa-clock"></i>
+      <h3>Durée de Séjour</h3>
+    </div>
+    <div class="model-duration">
+      <div class="duration-value">{{ patient.time_in_hospital or 0 }}</div>
+      <div class="duration-unit">jours</div>
+    </div>
+    <div class="model-prediction">
+      <span class="prediction-label">Prévision:</span>
+      <span class="prediction-value">
+        {% if not patient.time_in_hospital %}Non disponible{% elif patient.time_in_hospital|default(0) <= 3 %}Court séjour{% elif patient.time_in_hospital|default(0) <= 7 %}Séjour moyen{% else %}Séjour prolongé{% endif %}
+      </span>
+    </div>
+    <a href="{{ url_for('decision_support.duree_sejour', patient_id=patient.id) }}" class="btn btn-sm btn-secondary">
+      <i class="fas fa-chart-bar"></i> Détails
+    </a>
+  </div>
+</div>
+
+<!-- Cluster Information -->
+<div class="cluster-section">
+  <h3><i class="fas fa-users"></i> Profil du Patient - Cluster {{ patient.cluster_id }}</h3>
+  <div class="cluster-details">
+    <div class="cluster-info-card">
+      <h4>{{ cluster.nom }}</h4>
+      <p>{{ cluster.description }}</p>
+      <div class="cluster-stats">
+        <div class="stat-item">
+          <span class="stat-label">Taille du cluster:</span>
+          <span class="stat-value">{{ cluster.taille }} patients</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Âge moyen:</span>
+          <span class="stat-value">{{ cluster.caracteristiques.âge_moyen }} ans</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Durée moyenne:</span>
+          <span class="stat-value">{{ cluster.caracteristiques.duree_sejour_moyenne }} jours</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Taux de réadmission:</span>
+          <span class="stat-value">{{ (cluster.caracteristiques.readmission_rate * 100)|round(1) }}%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Taux de changement:</span>
+          <span class="stat-value">{{ (cluster.caracteristiques.change_rate * 100)|round(1) }}%</span>
+        </div>
+      </div>
+      <div class="cluster-conditions">
+        <h5>Conditions fréquentes:</h5>
+        <div class="conditions-tags">
+          {% for condition in cluster.conditions_frequentes %}
+          <span class="condition-tag">{{ condition }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="text-center">
+    <a href="{{ url_for('decision_support.clustering') }}" class="btn btn-primary">
+      <i class="fas fa-chart-pie"></i> Voir tous les clusters
+    </a>
+  </div>
+</div>
+
+<script>
+function changePatient() {
+  const patientId = document.getElementById('patientSelect').value;
+  window.location.href = `{{ url_for('decision_support.dashboard') }}?patient_id=${patientId}`;
+}
+</script>
+{% endblock %}
