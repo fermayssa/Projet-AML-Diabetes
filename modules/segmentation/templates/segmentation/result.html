@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Profil du patient : groupe {{ r.cluster }}</h1>
+<div class="card">
+  <h2>{{ r.info.name }}</h2>
+  <p>{{ r.info.description }}</p>
+  <p><b>Action suggérée :</b> {{ r.info.action }}</p>
+  <p><b>Part des patients de ce groupe :</b> {{ r.info.size_pct }} %<br>
+     <b>Taux de réadmission à 30 jours dans ce groupe :</b> {{ r.info.readmission_pct }} %</p>
+</div>
+
+<h3>Distance du patient au centre de chaque groupe</h3>
+<table>
+  <tr><th>Groupe</th><th>Nom</th><th>Distance</th></tr>
+  {% for i, d in r.distances %}
+  <tr {% if i == r.cluster %}style="font-weight:bold"{% endif %}>
+    <td>{{ i }}</td><td>{{ r.clusters[i|string].name }}</td><td>{{ d }}</td></tr>
+  {% endfor %}
+</table>
+<p><small>Plus la distance est faible, plus le patient ressemble au profil du groupe. Les noms et actions des groupes sont des hypothèses à valider par des cliniciens.</small></p>
+
+<p><a href="{{ url_for('segmentation.form') }}">← Nouvelle saisie</a></p>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Segmentation d'un patient</h1>
+<p>Saisissez les informations du séjour. Les informations non demandées sont remplacées par des valeurs typiques.</p>
+
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+{% if warning %}<div class="warn">{{ warning }}</div>{% endif %}
+
+{% if ready %}
+<form method="post" action="{{ url_for('segmentation.predict') }}">
+  <fieldset><legend>Patient et séjour</legend>
+    {% for name, label, lo, hi, default in numeric %}
+    <label>{{ label }}
+      <input type="number" name="{{ name }}" min="{{ lo }}" max="{{ hi }}" required
+             value="{{ values.get(name, default) }}">
+    </label>
+    {% endfor %}
+    <label>Sexe
+      <select name="gender">
+        <option value="Female" {{ 'selected' if values.get('gender') == 'Female' }}>Femme</option>
+        <option value="Male" {{ 'selected' if values.get('gender') == 'Male' }}>Homme</option>
+      </select>
+    </label>
+    <label>Traitement modifié pendant le séjour ?
+      <select name="change"><option value="0">Non</option><option value="1" {{ 'selected' if values.get('change') == '1' }}>Oui</option></select>
+    </label>
+    <label>Antidiabétique prescrit ?
+      <select name="diabetesMed"><option value="1">Oui</option><option value="0" {{ 'selected' if values.get('diabetesMed') == '0' }}>Non</option></select>
+    </label>
+  </fieldset>
+
+  <fieldset><legend>Contexte clinique</legend>
+    {% for var, label, cats, mode in nominal %}
+    <label>{{ label }}
+      <select name="{{ var }}">
+        {% for c in cats %}<option value="{{ c }}" {{ 'selected' if c == values.get(var, mode) }}>{{ c }}</option>{% endfor %}
+      </select>
+    </label>
+    {% endfor %}
+    {% for key, label in comorb %}
+    <label><input type="checkbox" name="{{ key }}" {{ 'checked' if values.get(key) }}> {{ label }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset><legend>Traitement antidiabétique</legend>
+    <label>Insuline
+      <select name="insulin_state">
+        {% for s, l in [('No','Non prescrite'),('Steady','Dose stable'),('Up','Dose augmentée'),('Down','Dose diminuée')] %}
+        <option value="{{ s }}" {{ 'selected' if values.get('insulin_state') == s }}>{{ l }}</option>{% endfor %}
+      </select>
+    </label>
+    {% for m in meds %}
+    <label><input type="checkbox" name="med_{{ m }}" {{ 'checked' if values.get('med_' ~ m) }}> {{ m }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <button type="submit">Trouver le profil du patient</button>
+</form>
+{% endif %}
+{% endblock %}

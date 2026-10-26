@@ -4,6 +4,7 @@ Routes pour le module Clinique
 from flask import render_template, redirect, url_for, flash, request
 from . import bp
 import db_config
+from modules.segmentation import service as seg
 
 @bp.route('/')
 def accueil():
@@ -23,7 +24,9 @@ def accueil():
     return render_template('accueil.html', 
                          patients_count=patients_count,
                          rendez_vous_count=rendez_vous_count,
-                         rendez_vous=rendez_vous)
+                         rendez_vous=rendez_vous,
+                       seg_clusters=seg.clusters(),
+                       seg_dashboard=seg.dashboard_data())
 
 @bp.route('/patients')
 def patients():
