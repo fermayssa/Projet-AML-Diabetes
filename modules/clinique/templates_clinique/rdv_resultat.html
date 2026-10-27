@@ -7,6 +7,9 @@
   .urg-badge.urgent { background: #c0392b; }
   .urg-badge.priority { background: #e67e22; }
   .urg-badge.standard { background: #2e86c1; }
+  .mail-box { font-size: 18px; padding: 14px 18px; border-radius: 10px; margin: 16px 0; }
+  .mail-box.ok { background: #ede9fe; color: #4c1d95; }
+  .mail-box.ko { background: #fde8e8; color: #c0392b; }
 </style>
 
 <div class="page-header"><h1><i class="fas fa-calendar-check"></i> Rendez-vous planifié</h1></div>
@@ -20,7 +23,10 @@
      <b>Date :</b> {{ date }} à {{ heure }}<br>
      <b>Groupe :</b> {{ res.cluster }} : {{ res.info.name }}</p>
   <p><b>Action suggérée pour ce groupe :</b> {{ res.info.action }}</p>
-
+    <div class="mail-box {{ 'ok' if mail_status in ('simulé', 'envoyé') else 'ko' }}">
+    <i class="fas fa-envelope"></i>
+    <b>Notification au patient :</b> {{ mail_status }}
+  </div>
   <h3>Pourquoi ce niveau ?</h3>
   {% if t.reasons %}<ul>{% for x in t.reasons %}<li>{{ x }}</li>{% endfor %}</ul>
   {% else %}<p>Aucun facteur de risque particulier.</p>{% endif %}

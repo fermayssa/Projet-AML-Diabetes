@@ -4,9 +4,9 @@ Routes pour le module Clinique
 from flask import render_template, redirect, url_for, flash, request
 from . import bp
 import db_config
-from modules.segmentation import service as seg
 import json
 from modules.segmentation import service as seg, triage as seg_triage
+from . import notify
 
 @bp.route('/')
 def accueil():
@@ -72,14 +72,14 @@ def nouveau_patient():
 @bp.route('/nouveau-rendez-vous', methods=['GET', 'POST'])
 def nouveau_rendez_vous():
     """Prise de RDV : calcule le groupe du patient et le niveau d'urgence."""
+    error = None
+    values = request.form.to_dict() if request.method == 'POST' else {}
+
     conn = db_config.get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM patients")
             patients = cursor.fetchall()
-
-        error = None
-        values = request.form.to_dict() if request.method == 'POST' else {}
 
         if request.method == 'POST':
             try:
@@ -107,8 +107,11 @@ def nouveau_rendez_vous():
                          res['cluster'], t['level'], t['score'],
                          json.dumps(t['reasons'], ensure_ascii=False)))
                 conn.commit()
+
+                mail_status = notify.confirm_rdv(patient, values['date'], values['heure'], t['label'])
                 return render_template('rdv_resultat.html', patient=patient, res=res, t=t,
-                                       date=values['date'], heure=values['heure'])
+                                       date=values['date'], heure=values['heure'],
+                                       mail_status=mail_status)
             except ValueError as exc:
                 error = str(exc)
             except Exception as exc:
@@ -117,10 +120,9 @@ def nouveau_rendez_vous():
     finally:
         conn.close()
 
-        ctx = seg.form_context(values=values)
-        ctx["error"] = error or ctx.get("error")     # notre message d'abord, sinon l'erreur du modèle
-        return render_template('nouveau_rendez_vous.html', patients=patients, **ctx)
-
+    ctx = seg.form_context(values=values)
+    ctx["error"] = error or ctx.get("error")     # notre message d'abord, sinon l'erreur du modèle
+    return render_template('nouveau_rendez_vous.html', patients=patients, **ctx)
 @bp.route('/patients/add', methods=['POST'])
 def add_patient():
     """Ajouter un nouveau patient"""
