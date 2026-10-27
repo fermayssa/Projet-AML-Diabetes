@@ -1,0 +1,749 @@
+{
+  "columns": [
+    "race",
+    "gender",
+    "age",
+    "admission_type_id",
+    "discharge_disposition_id",
+    "admission_source_id",
+    "time_in_hospital",
+    "payer_code",
+    "medical_specialty",
+    "num_lab_procedures",
+    "num_procedures",
+    "num_medications",
+    "number_outpatient",
+    "number_emergency",
+    "number_inpatient",
+    "diag_1",
+    "diag_2",
+    "diag_3",
+    "number_diagnoses",
+    "max_glu_serum",
+    "A1Cresult",
+    "metformin",
+    "repaglinide",
+    "nateglinide",
+    "chlorpropamide",
+    "glimepiride",
+    "acetohexamide",
+    "glipizide",
+    "glyburide",
+    "tolbutamide",
+    "pioglitazone",
+    "rosiglitazone",
+    "acarbose",
+    "miglitol",
+    "troglitazone",
+    "tolazamide",
+    "insulin",
+    "glyburide-metformin",
+    "glipizide-metformin",
+    "metformin-rosiglitazone",
+    "metformin-pioglitazone",
+    "change",
+    "diabetesMed"
+  ],
+  "num_cols": [
+    "time_in_hospital",
+    "num_lab_procedures",
+    "num_procedures",
+    "num_medications",
+    "number_outpatient",
+    "number_emergency",
+    "number_inpatient",
+    "number_diagnoses"
+  ],
+  "code_cols": [
+    "admission_type_id",
+    "discharge_disposition_id",
+    "admission_source_id"
+  ],
+  "cat_cols": [
+    "race",
+    "gender",
+    "age",
+    "payer_code",
+    "medical_specialty",
+    "diag_1",
+    "diag_2",
+    "diag_3",
+    "max_glu_serum",
+    "A1Cresult",
+    "metformin",
+    "repaglinide",
+    "nateglinide",
+    "chlorpropamide",
+    "glimepiride",
+    "acetohexamide",
+    "glipizide",
+    "glyburide",
+    "tolbutamide",
+    "pioglitazone",
+    "rosiglitazone",
+    "acarbose",
+    "miglitol",
+    "troglitazone",
+    "tolazamide",
+    "insulin",
+    "glyburide-metformin",
+    "glipizide-metformin",
+    "metformin-rosiglitazone",
+    "metformin-pioglitazone",
+    "change",
+    "diabetesMed"
+  ],
+  "categories": {
+    "race": [
+      "AfricanAmerican",
+      "Asian",
+      "Caucasian",
+      "Hispanic",
+      "Inconnu",
+      "Other"
+    ],
+    "gender": [
+      "Female",
+      "Male",
+      "Unknown/Invalid"
+    ],
+    "age": [
+      "[0-10)",
+      "[10-20)",
+      "[20-30)",
+      "[30-40)",
+      "[40-50)",
+      "[50-60)",
+      "[60-70)",
+      "[70-80)",
+      "[80-90)",
+      "[90-100)"
+    ],
+    "payer_code": [
+      "BC",
+      "CH",
+      "CM",
+      "CP",
+      "DM",
+      "FR",
+      "HM",
+      "Inconnu",
+      "MC",
+      "MD",
+      "MP",
+      "OG",
+      "OT",
+      "PO",
+      "SI",
+      "SP",
+      "UN",
+      "WC"
+    ],
+    "medical_specialty": [
+      "AllergyandImmunology",
+      "Anesthesiology",
+      "Anesthesiology-Pediatric",
+      "Cardiology",
+      "Cardiology-Pediatric",
+      "DCPTEAM",
+      "Dentistry",
+      "Dermatology",
+      "Emergency/Trauma",
+      "Endocrinology",
+      "Endocrinology-Metabolism",
+      "Family/GeneralPractice",
+      "Gastroenterology",
+      "Gynecology",
+      "Hematology",
+      "Hematology/Oncology",
+      "Hospitalist",
+      "Inconnu",
+      "InfectiousDiseases",
+      "InternalMedicine",
+      "Nephrology",
+      "Neurology",
+      "Neurophysiology",
+      "Obsterics&Gynecology-GynecologicOnco",
+      "Obstetrics",
+      "ObstetricsandGynecology",
+      "Oncology",
+      "Ophthalmology",
+      "Orthopedics",
+      "Orthopedics-Reconstructive",
+      "Osteopath",
+      "Otolaryngology",
+      "OutreachServices",
+      "Pathology",
+      "Pediatrics",
+      "Pediatrics-CriticalCare",
+      "Pediatrics-EmergencyMedicine",
+      "Pediatrics-Endocrinology",
+      "Pediatrics-Hematology-Oncology",
+      "Pediatrics-Neurology",
+      "Pediatrics-Pulmonology",
+      "Perinatology",
+      "PhysicalMedicineandRehabilitation",
+      "PhysicianNotFound",
+      "Podiatry",
+      "Proctology",
+      "Psychiatry",
+      "Psychiatry-Addictive",
+      "Psychiatry-Child/Adolescent",
+      "Psychology",
+      "Pulmonology",
+      "Radiologist",
+      "Radiology",
+      "Resident",
+      "Rheumatology",
+      "Speech",
+      "SportsMedicine",
+      "Surgeon",
+      "Surgery-Cardiovascular",
+      "Surgery-Cardiovascular/Thoracic",
+      "Surgery-Colon&Rectal",
+      "Surgery-General",
+      "Surgery-Maxillofacial",
+      "Surgery-Neuro",
+      "Surgery-Pediatric",
+      "Surgery-Plastic",
+      "Surgery-PlasticwithinHeadandNeck",
+      "Surgery-Thoracic",
+      "Surgery-Vascular",
+      "SurgicalSpecialty",
+      "Urology"
+    ],
+    "diag_1": [
+      "Autre",
+      "Blessure",
+      "Circulatoire",
+      "Diabete",
+      "Digestif",
+      "Genito-urinaire",
+      "Inconnu",
+      "Musculo-squelettique",
+      "Respiratoire",
+      "Tumeurs"
+    ],
+    "diag_2": [
+      "Autre",
+      "Blessure",
+      "Circulatoire",
+      "Diabete",
+      "Digestif",
+      "Genito-urinaire",
+      "Inconnu",
+      "Musculo-squelettique",
+      "Respiratoire",
+      "Tumeurs"
+    ],
+    "diag_3": [
+      "Autre",
+      "Blessure",
+      "Circulatoire",
+      "Diabete",
+      "Digestif",
+      "Genito-urinaire",
+      "Inconnu",
+      "Musculo-squelettique",
+      "Respiratoire",
+      "Tumeurs"
+    ],
+    "max_glu_serum": [
+      ">200",
+      ">300",
+      "None",
+      "Norm"
+    ],
+    "A1Cresult": [
+      ">7",
+      ">8",
+      "None",
+      "Norm"
+    ],
+    "metformin": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "repaglinide": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "nateglinide": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "chlorpropamide": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "glimepiride": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "acetohexamide": [
+      "No",
+      "Steady"
+    ],
+    "glipizide": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "glyburide": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "tolbutamide": [
+      "No",
+      "Steady"
+    ],
+    "pioglitazone": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "rosiglitazone": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "acarbose": [
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "miglitol": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "troglitazone": [
+      "No",
+      "Steady"
+    ],
+    "tolazamide": [
+      "No",
+      "Steady"
+    ],
+    "insulin": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "glyburide-metformin": [
+      "Down",
+      "No",
+      "Steady",
+      "Up"
+    ],
+    "glipizide-metformin": [
+      "No",
+      "Steady"
+    ],
+    "metformin-rosiglitazone": [
+      "No",
+      "Steady"
+    ],
+    "metformin-pioglitazone": [
+      "No",
+      "Steady"
+    ],
+    "change": [
+      "Ch",
+      "No"
+    ],
+    "diabetesMed": [
+      "No",
+      "Yes"
+    ]
+  },
+  "caps": {
+    "time_in_hospital": [
+      1.0,
+      13.0
+    ],
+    "num_lab_procedures": [
+      1.0,
+      85.0
+    ],
+    "num_procedures": [
+      0.0,
+      6.0
+    ],
+    "num_medications": [
+      3.0,
+      44.0
+    ],
+    "number_outpatient": [
+      0.0,
+      4.0
+    ],
+    "number_emergency": [
+      0.0,
+      2.0
+    ],
+    "number_inpatient": [
+      0.0,
+      3.0
+    ],
+    "number_diagnoses": [
+      2.0,
+      9.0
+    ]
+  },
+  "defaults": {
+    "race": "Caucasian",
+    "gender": "Female",
+    "age": "[70-80)",
+    "admission_type_id": 1,
+    "discharge_disposition_id": 1,
+    "admission_source_id": 7,
+    "time_in_hospital": 3.0,
+    "payer_code": "Inconnu",
+    "medical_specialty": "Inconnu",
+    "num_lab_procedures": 44.0,
+    "num_procedures": 1.0,
+    "num_medications": 14.0,
+    "number_outpatient": 0.0,
+    "number_emergency": 0.0,
+    "number_inpatient": 0.0,
+    "diag_1": "Circulatoire",
+    "diag_2": "Circulatoire",
+    "diag_3": "Circulatoire",
+    "number_diagnoses": 8.0,
+    "max_glu_serum": "None",
+    "A1Cresult": "None",
+    "metformin": "No",
+    "repaglinide": "No",
+    "nateglinide": "No",
+    "chlorpropamide": "No",
+    "glimepiride": "No",
+    "acetohexamide": "No",
+    "glipizide": "No",
+    "glyburide": "No",
+    "tolbutamide": "No",
+    "pioglitazone": "No",
+    "rosiglitazone": "No",
+    "acarbose": "No",
+    "miglitol": "No",
+    "troglitazone": "No",
+    "tolazamide": "No",
+    "insulin": "No",
+    "glyburide-metformin": "No",
+    "glipizide-metformin": "No",
+    "metformin-rosiglitazone": "No",
+    "metformin-pioglitazone": "No",
+    "change": "No",
+    "diabetesMed": "Yes"
+  },
+  "form_fields": [
+    {
+      "name": "age",
+      "label": "Tranche d'âge",
+      "type": "choix",
+      "default": "[70-80)",
+      "choices": [
+        {
+          "value": "[0-10)",
+          "label": "[0-10)"
+        },
+        {
+          "value": "[10-20)",
+          "label": "[10-20)"
+        },
+        {
+          "value": "[20-30)",
+          "label": "[20-30)"
+        },
+        {
+          "value": "[30-40)",
+          "label": "[30-40)"
+        },
+        {
+          "value": "[40-50)",
+          "label": "[40-50)"
+        },
+        {
+          "value": "[50-60)",
+          "label": "[50-60)"
+        },
+        {
+          "value": "[60-70)",
+          "label": "[60-70)"
+        },
+        {
+          "value": "[70-80)",
+          "label": "[70-80)"
+        },
+        {
+          "value": "[80-90)",
+          "label": "[80-90)"
+        },
+        {
+          "value": "[90-100)",
+          "label": "[90-100)"
+        }
+      ]
+    },
+    {
+      "name": "gender",
+      "label": "Sexe",
+      "type": "choix",
+      "default": "Female",
+      "choices": [
+        {
+          "value": "Female",
+          "label": "Femme"
+        },
+        {
+          "value": "Male",
+          "label": "Homme"
+        }
+      ]
+    },
+    {
+      "name": "time_in_hospital",
+      "label": "Durée du séjour (jours)",
+      "type": "nombre",
+      "default": 3.0,
+      "min": 1,
+      "max": 13
+    },
+    {
+      "name": "num_lab_procedures",
+      "label": "Nombre d'analyses de laboratoire",
+      "type": "nombre",
+      "default": 44.0,
+      "min": 1,
+      "max": 85
+    },
+    {
+      "name": "num_procedures",
+      "label": "Nombre de procédures (hors laboratoire)",
+      "type": "nombre",
+      "default": 1.0,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "name": "num_medications",
+      "label": "Nombre de médicaments administrés",
+      "type": "nombre",
+      "default": 14.0,
+      "min": 3,
+      "max": 44
+    },
+    {
+      "name": "number_diagnoses",
+      "label": "Nombre de diagnostics",
+      "type": "nombre",
+      "default": 8.0,
+      "min": 2,
+      "max": 9
+    },
+    {
+      "name": "number_outpatient",
+      "label": "Consultations externes (année précédente)",
+      "type": "nombre",
+      "default": 0.0,
+      "min": 0,
+      "max": 4
+    },
+    {
+      "name": "number_emergency",
+      "label": "Passages aux urgences (année précédente)",
+      "type": "nombre",
+      "default": 0.0,
+      "min": 0,
+      "max": 2
+    },
+    {
+      "name": "number_inpatient",
+      "label": "Hospitalisations (année précédente)",
+      "type": "nombre",
+      "default": 0.0,
+      "min": 0,
+      "max": 3
+    },
+    {
+      "name": "diag_1",
+      "label": "Diagnostic principal (famille de maladies)",
+      "type": "choix",
+      "default": "Circulatoire",
+      "choices": [
+        {
+          "value": "Autre",
+          "label": "Autre"
+        },
+        {
+          "value": "Blessure",
+          "label": "Blessure"
+        },
+        {
+          "value": "Circulatoire",
+          "label": "Circulatoire"
+        },
+        {
+          "value": "Diabete",
+          "label": "Diabete"
+        },
+        {
+          "value": "Digestif",
+          "label": "Digestif"
+        },
+        {
+          "value": "Genito-urinaire",
+          "label": "Genito-urinaire"
+        },
+        {
+          "value": "Musculo-squelettique",
+          "label": "Musculo-squelettique"
+        },
+        {
+          "value": "Respiratoire",
+          "label": "Respiratoire"
+        },
+        {
+          "value": "Tumeurs",
+          "label": "Tumeurs"
+        }
+      ]
+    },
+    {
+      "name": "A1Cresult",
+      "label": "Résultat HbA1c",
+      "type": "choix",
+      "default": "None",
+      "choices": [
+        {
+          "value": ">7",
+          "label": "> 7"
+        },
+        {
+          "value": ">8",
+          "label": "> 8"
+        },
+        {
+          "value": "None",
+          "label": "Non mesuré"
+        },
+        {
+          "value": "Norm",
+          "label": "Normal"
+        }
+      ]
+    },
+    {
+      "name": "insulin",
+      "label": "Insuline",
+      "type": "choix",
+      "default": "No",
+      "choices": [
+        {
+          "value": "Down",
+          "label": "Dose diminuée"
+        },
+        {
+          "value": "No",
+          "label": "Non prescrit"
+        },
+        {
+          "value": "Steady",
+          "label": "Dose stable"
+        },
+        {
+          "value": "Up",
+          "label": "Dose augmentée"
+        }
+      ]
+    },
+    {
+      "name": "change",
+      "label": "Traitement modifié pendant le séjour ?",
+      "type": "choix",
+      "default": "No",
+      "choices": [
+        {
+          "value": "Ch",
+          "label": "Oui"
+        },
+        {
+          "value": "No",
+          "label": "Non"
+        }
+      ]
+    },
+    {
+      "name": "diabetesMed",
+      "label": "Antidiabétiques prescrits ?",
+      "type": "choix",
+      "default": "Yes",
+      "choices": [
+        {
+          "value": "No",
+          "label": "Non"
+        },
+        {
+          "value": "Yes",
+          "label": "Oui"
+        }
+      ]
+    }
+  ],
+  "classes": {
+    "0": {
+      "name": "<30",
+      "label": "Réadmission en moins de 30 jours",
+      "action": "Suivi renforcé avant la sortie : rendez-vous de contrôle rapide, revue du traitement, appel de suivi."
+    },
+    "1": {
+      "name": ">30",
+      "label": "Réadmission après 30 jours",
+      "action": "Suivi à moyen terme et éducation thérapeutique."
+    },
+    "2": {
+      "name": "NO",
+      "label": "Pas de réadmission",
+      "action": "Parcours standard, éducation thérapeutique de base."
+    }
+  },
+  "alert": {
+    "class_index": 0,
+    "threshold": 0.11720901727676392,
+    "description": "Alerte si la probabilité de réadmission < 30 jours dépasse ce seuil (20 % des patients les plus à risque du jeu de test).",
+    "share_alerted_pct": 20.0,
+    "precision_pct": 17.0,
+    "recall_pct": 38.0,
+    "base_rate_pct": 8.9
+  },
+  "metrics": {
+    "accuracy": 0.616,
+    "baseline_accuracy": 0.595,
+    "f1_macro": 0.366,
+    "auc_ovr": 0.657
+  },
+  "versions": {
+    "sklearn": "1.6.1",
+    "xgboost": "3.4.1",
+    "pandas": "2.2.3",
+    "numpy": "2.1.3",
+    "python": "3.13.16"
+  }
+}

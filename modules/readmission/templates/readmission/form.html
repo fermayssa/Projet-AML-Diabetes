@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Prédiction de réadmission{% endblock %}
+{% block content %}
+<style>
+  .rd-form fieldset { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px 20px 20px; margin-bottom:16px; }
+  .rd-form legend { font-weight:700; color:#4c1d95; padding:0 8px; }
+  .rd-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .rd-form label { display:flex; flex-direction:column; gap:4px; font-size:14px; color:#374151; }
+  .rd-form input, .rd-form select { padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#fff; }
+  .rd-submit { background:linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; border:0; padding:12px 24px; border-radius:10px; font-size:16px; cursor:pointer; }
+</style>
+
+<div class="page-header"><h1><i class="fas fa-redo"></i> Prédiction de la réadmission</h1></div>
+<p>Saisissez les informations du séjour. Les informations non demandées sont remplacées par des valeurs typiques.</p>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if warning %}<div class="alert alert-warning">{{ warning }}</div>{% endif %}
+
+{% if ready %}
+<form class="rd-form" method="post" action="{{ url_for('readmission.predict') }}">
+  <fieldset><legend>Séjour et antécédents</legend>
+    <div class="rd-grid">
+    {% for f in fields if f.type == 'nombre' %}
+      <label>{{ f.label }}
+        <input type="number" name="{{ f.name }}" min="{{ f.lo }}" max="{{ f.hi }}" required
+               value="{{ values.get(f.name, f.default) }}">
+      </label>
+    {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset><legend>Patient et contexte clinique</legend>
+    <div class="rd-grid">
+    {% for f in fields if f.type == 'choix' %}
+      <label>{{ f.label }}
+        <select name="{{ f.name }}">
+          {% for c in f.choices %}
+          <option value="{{ c.value }}" {{ 'selected' if c.value == values.get(f.name, f.default) }}>{{ c.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endfor %}
+    </div>
+  </fieldset>
+
+  <button type="submit" class="rd-submit"><i class="fas fa-search"></i> Prédire la réadmission</button>
+</form>
+{% endif %}
+{% endblock %}
