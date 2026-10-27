@@ -5,28 +5,13 @@ from flask import render_template, redirect, url_for, flash, request
 from . import bp
 import db_config
 from modules.segmentation import service as seg
+import json
+from modules.segmentation import service as seg, triage as seg_triage
 
 @bp.route('/')
 def accueil():
-    """Page d'accueil de la clinique"""
-    conn = db_config.get_db_connection()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) as count FROM patients")
-            patients_count = cursor.fetchone()['count']
-            cursor.execute("SELECT COUNT(*) as count FROM rendez_vous")
-            rendez_vous_count = cursor.fetchone()['count']
-            cursor.execute("SELECT * FROM rendez_vous ORDER BY date LIMIT 3")
-            rendez_vous = cursor.fetchall()
-    finally:
-        conn.close()
-    
-    return render_template('accueil.html', 
-                         patients_count=patients_count,
-                         rendez_vous_count=rendez_vous_count,
-                         rendez_vous=rendez_vous,
-                       seg_clusters=seg.clusters(),
-                       seg_dashboard=seg.dashboard_data())
+    """Le dashboard clinique est celui des groupes de patients (module segmentation)."""
+    return redirect(url_for('segmentation.dashboard'))
 
 @bp.route('/patients')
 def patients():
@@ -67,7 +52,12 @@ def rendez_vous():
     conn = db_config.get_db_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM rendez_vous ORDER BY date")
+            cursor.execute("""
+    SELECT r.*, CONCAT(p.prenom, ' ', p.nom) AS patient_nom
+    FROM rendez_vous r
+    LEFT JOIN patients p ON p.id = r.patient_id
+    ORDER BY (r.urgence IS NULL), FIELD(r.urgence, 'urgent', 'priority', 'standard'), r.date
+""")
             rendez_vous = cursor.fetchall()
     finally:
         conn.close()
@@ -79,18 +69,57 @@ def nouveau_patient():
     """Formulaire d'ajout de patient"""
     return render_template('nouveau_patient.html')
 
-@bp.route('/nouveau-rendez-vous')
+@bp.route('/nouveau-rendez-vous', methods=['GET', 'POST'])
 def nouveau_rendez_vous():
-    """Formulaire de prise de rendez-vous"""
+    """Prise de RDV : calcule le groupe du patient et le niveau d'urgence."""
     conn = db_config.get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM patients")
             patients = cursor.fetchall()
+
+        error = None
+        values = request.form.to_dict() if request.method == 'POST' else {}
+
+        if request.method == 'POST':
+            try:
+                if not seg.is_ready():
+                    raise ValueError("Le modèle de segmentation n'est pas disponible.")
+                patient = next((p for p in patients if str(p['id']) == values.get('patient')), None)
+                if not patient:
+                    raise ValueError("Veuillez sélectionner un patient.")
+                if not values.get('date') or not values.get('heure'):
+                    raise ValueError("La date et l'heure sont obligatoires.")
+
+                raw = seg.form_to_raw(request.form)          # valide les champs cliniques
+                res = seg.predict_raw(raw)
+                t = seg_triage.evaluate(raw, res['cluster'], values.get('type_rdv', ''))
+
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """INSERT INTO rendez_vous
+                           (patient_id, date, duree, type_rdv, motif, notes,
+                            cluster, urgence, score, raisons)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (patient['id'], f"{values['date']} {values['heure']}",
+                         values.get('duree') or 30, values.get('type_rdv'),
+                         values.get('motif'), values.get('notes'),
+                         res['cluster'], t['level'], t['score'],
+                         json.dumps(t['reasons'], ensure_ascii=False)))
+                conn.commit()
+                return render_template('rdv_resultat.html', patient=patient, res=res, t=t,
+                                       date=values['date'], heure=values['heure'])
+            except ValueError as exc:
+                error = str(exc)
+            except Exception as exc:
+                conn.rollback()
+                error = f"Erreur lors de l'enregistrement : {exc}"
     finally:
         conn.close()
-    
-    return render_template('nouveau_rendez_vous.html', patients=patients)
+
+        ctx = seg.form_context(values=values)
+        ctx["error"] = error or ctx.get("error")     # notre message d'abord, sinon l'erreur du modèle
+        return render_template('nouveau_rendez_vous.html', patients=patients, **ctx)
 
 @bp.route('/patients/add', methods=['POST'])
 def add_patient():

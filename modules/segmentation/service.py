@@ -196,13 +196,17 @@ def row_to_cluster(df_row):
     return cluster, dist
 
 
-def predict(form):
-    raw = form_to_raw(form)
+def predict_raw(raw):
+    """Prédiction à partir d'un dictionnaire 'patient' déjà validé."""
     cluster, dist = row_to_cluster(raw_to_row(raw))
     info = _state["cfg"]["clusters"][str(cluster)]
     return {"cluster": cluster, "info": info,
             "distances": [(i, round(float(d), 2)) for i, d in enumerate(dist)],
             "clusters": _state["cfg"]["clusters"]}
+
+
+def predict(form):
+    return predict_raw(form_to_raw(form))
 
 
 def clusters():

@@ -294,9 +294,10 @@
           <i class="fas fa-chart-line"></i>
           <span>Dashboard Clinique</span>
         </a>
-        <a href="{{ url_for('clinique.patients') }}" class="nav-item">
-          <i class="fas fa-users"></i>
-          <span>Patients</span>
+        
+        <a href="{{ url_for('segmentation.form') }}" class="nav-item">
+          <i class="fas fa-vial"></i>
+          <span>Tester un patient</span>
         </a>
         <a href="{{ url_for('clinique.rendez_vous') }}" class="nav-item">
           <i class="fas fa-calendar-alt"></i>
@@ -304,10 +305,7 @@
         </a>
         <div class="nav-divider"></div>
         <div class="nav-section-title">Aide à la Décision</div>
-        <a href="/segmentation/dashboard" class="nav-item">
-          <i class="fas fa-th-large"></i>
-          <span>Tableau de Bord</span>
-        </a>
+        
         <a href="{{ url_for('decision_support.clustering') }}" class="nav-item">
           <i class="fas fa-chart-pie"></i>
           <span>Profilage Patients</span>

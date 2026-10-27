@@ -8,8 +8,11 @@
   <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
 </div>
 
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if warning %}<div class="alert alert-warning">{{ warning }}</div>{% endif %}
+
 <div class="form-container">
-  <form method="POST" action="{{ url_for('clinique.rendez_vous') }}">
+  <form method="POST" action="{{ url_for('clinique.nouveau_rendez_vous') }}">
     <div class="form-section">
       <h2>Informations du rendez-vous</h2>
       <div class="form-group">
@@ -17,65 +20,72 @@
         <select id="patient" name="patient" required>
           <option value="">Sélectionner un patient...</option>
           {% for patient in patients %}
-          <option value="{{ patient.id }}">{{ patient.prenom }} {{ patient.nom }}</option>
+          <option value="{{ patient.id }}" data-age="{{ patient.age or '' }}" data-sexe="{{ patient.sexe or '' }}"
+                  {{ 'selected' if values.get('patient') == patient.id|string }}>
+            {{ patient.prenom }} {{ patient.nom }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="date">Date *</label>
-          <input type="date" id="date" name="date" required>
+          <input type="date" id="date" name="date" required value="{{ values.get('date', '') }}">
         </div>
         <div class="form-group">
           <label for="heure">Heure *</label>
-          <input type="time" id="heure" name="heure" required>
+          <input type="time" id="heure" name="heure" required value="{{ values.get('heure', '') }}">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="duree">Durée (minutes)</label>
-          <input type="number" id="duree" name="duree" value="30" min="15" step="15">
+          <input type="number" id="duree" name="duree" value="{{ values.get('duree', 30) }}" min="15" step="15">
         </div>
         <div class="form-group">
-          <label for="type">Type de consultation *</label>
-          <select id="type" name="type" required>
+          <label for="type_rdv">Type de consultation *</label>
+          <select id="type_rdv" name="type_rdv" required>
             <option value="">Sélectionner...</option>
-            <option value="Consultation générale">Consultation générale</option>
-            <option value="Suivi diabète">Suivi diabète</option>
-            <option value="Analyse sanguine">Analyse sanguine</option>
-            <option value="Cardiologie">Cardiologie</option>
-            <option value="Urgence">Urgence</option>
-            <option value="Vaccination">Vaccination</option>
+            {% for code, label in [('consultation','Consultation générale'),('suivi','Suivi diabète'),
+                                   ('examen','Analyse sanguine'),('cardiologie','Cardiologie'),('urgence','Urgence')] %}
+            <option value="{{ code }}" {{ 'selected' if values.get('type_rdv') == code }}>{{ label }}</option>
+            {% endfor %}
           </select>
         </div>
       </div>
-      <div class="form-group">
-        <label for="medecin">Médecin</label>
-        <select id="medecin" name="medecin">
-          <option value="">Non assigné</option>
-          <option value="Dr. Martin">Dr. Martin - Médecin généraliste</option>
-          <option value="Dr. Dupont">Dr. Dupont - Endocrinologue</option>
-          <option value="Dr. Bernard">Dr. Bernard - Cardiologue</option>
-        </select>
-      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Évaluation clinique du patient</h2>
+      <p><small>Ces informations servent à trouver le groupe du patient et à calculer le niveau d'urgence du rendez-vous.</small></p>
+      {% if ready %}{% include "segmentation/_clinical_fields.html" %}{% endif %}
     </div>
 
     <div class="form-section">
       <h2>Détails</h2>
       <div class="form-group">
         <label for="motif">Motif de consultation</label>
-        <textarea id="motif" name="motif" rows="3" placeholder="Décrivez le motif de la consultation..."></textarea>
+        <textarea id="motif" name="motif" rows="3" placeholder="Décrivez le motif de la consultation...">{{ values.get('motif', '') }}</textarea>
       </div>
       <div class="form-group">
         <label for="notes">Notes additionnelles</label>
-        <textarea id="notes" name="notes" rows="2" placeholder="Informations complémentaires..."></textarea>
+        <textarea id="notes" name="notes" rows="2" placeholder="Informations complémentaires...">{{ values.get('notes', '') }}</textarea>
       </div>
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 💾 Planifier le rendez-vous</button>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Évaluer et planifier</button>
       <a href="{{ url_for('clinique.rendez_vous') }}" class="btn btn-secondary">Annuler</a>
     </div>
   </form>
 </div>
+
+<script>
+  // Pré-remplit l'âge et le sexe à partir de la fiche du patient choisi
+  document.getElementById('patient').addEventListener('change', function () {
+    const o = this.options[this.selectedIndex];
+    if (o.dataset.age && document.getElementById('seg_age')) document.getElementById('seg_age').value = o.dataset.age;
+    if (o.dataset.sexe && document.getElementById('seg_gender'))
+      document.getElementById('seg_gender').value = o.dataset.sexe === 'M' ? 'Male' : 'Female';
+  });
+</script>
 {% endblock %}

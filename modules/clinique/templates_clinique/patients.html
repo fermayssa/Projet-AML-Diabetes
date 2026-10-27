@@ -3,6 +3,9 @@
 {% block title %}Patients - Clinique{% endblock %}
 
 {% block content %}
+<a href="{{ url_for('segmentation.form') }}" class="btn btn-primary">
+  <i class="fas fa-vial"></i> Tester un patient (groupe)
+</a>
 <div class="page-header">
   <h1><i class="fas fa-users"></i> Liste des Patients</h1>
   <button id="toggleFormBtn" class="btn btn-primary"><i class="fas fa-user-plus"></i> Nouveau Patient</button>

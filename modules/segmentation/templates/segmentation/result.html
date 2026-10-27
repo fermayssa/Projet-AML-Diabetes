@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% block title %}Profil du patient{% endblock %}
+
 {% block content %}
-<h1>Profil du patient : groupe {{ r.cluster }}</h1>
-<div class="card">
+<div class="page-header"><h1><i class="fas fa-user-check"></i> Profil du patient : groupe {{ r.cluster }}</h1></div>
+
+<div class="card" style="margin-bottom:20px">
   <h2>{{ r.info.name }}</h2>
   <p>{{ r.info.description }}</p>
   <p><b>Action suggérée :</b> {{ r.info.action }}</p>
@@ -9,15 +12,22 @@
      <b>Taux de réadmission à 30 jours dans ce groupe :</b> {{ r.info.readmission_pct }} %</p>
 </div>
 
-<h3>Distance du patient au centre de chaque groupe</h3>
-<table>
-  <tr><th>Groupe</th><th>Nom</th><th>Distance</th></tr>
-  {% for i, d in r.distances %}
-  <tr {% if i == r.cluster %}style="font-weight:bold"{% endif %}>
-    <td>{{ i }}</td><td>{{ r.clusters[i|string].name }}</td><td>{{ d }}</td></tr>
-  {% endfor %}
-</table>
-<p><small>Plus la distance est faible, plus le patient ressemble au profil du groupe. Les noms et actions des groupes sont des hypothèses à valider par des cliniciens.</small></p>
+<div class="section">
+  <h3>Distance du patient au centre de chaque groupe</h3>
+  <div class="table-container">
+    <table class="data-table">
+      <thead><tr><th>Groupe</th><th>Nom</th><th>Distance</th></tr></thead>
+      <tbody>
+      {% for i, d in r.distances %}
+        <tr {% if i == r.cluster %}style="font-weight:bold; background:#f3e8ff"{% endif %}>
+          <td>{{ i }}</td><td>{{ r.clusters[i|string].name }}</td><td>{{ d }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><small>Plus la distance est faible, plus le patient ressemble au profil du groupe. Les noms et actions des groupes sont des hypothèses à valider par des cliniciens.</small></p>
+</div>
 
-<p><a href="{{ url_for('segmentation.form') }}">← Nouvelle saisie</a></p>
+<a class="btn btn-primary" href="{{ url_for('segmentation.form') }}"><i class="fas fa-redo"></i> Nouvelle saisie</a>
+<a class="btn btn-secondary" href="{{ url_for('clinique.patients') }}"><i class="fas fa-users"></i> Retour aux patients</a>
 {% endblock %}

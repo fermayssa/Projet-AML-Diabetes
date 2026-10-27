@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Rendez-vous planifié{% endblock %}
+
+{% block content %}
+<style>
+  .urg-badge { color: #fff; padding: 4px 14px; border-radius: 6px; font-weight: 700; }
+  .urg-badge.urgent { background: #c0392b; }
+  .urg-badge.priority { background: #e67e22; }
+  .urg-badge.standard { background: #2e86c1; }
+</style>
+
+<div class="page-header"><h1><i class="fas fa-calendar-check"></i> Rendez-vous planifié</h1></div>
+
+<div class="card" style="margin-bottom:20px">
+  <p style="font-size:20px">
+    <span class="urg-badge {{ t.level }}">{{ t.label }}</span>
+    &nbsp; score {{ t.score }}
+  </p>
+  <p><b>Patient :</b> {{ patient.prenom }} {{ patient.nom }}<br>
+     <b>Date :</b> {{ date }} à {{ heure }}<br>
+     <b>Groupe :</b> {{ res.cluster }} : {{ res.info.name }}</p>
+  <p><b>Action suggérée pour ce groupe :</b> {{ res.info.action }}</p>
+
+  <h3>Pourquoi ce niveau ?</h3>
+  {% if t.reasons %}<ul>{% for x in t.reasons %}<li>{{ x }}</li>{% endfor %}</ul>
+  {% else %}<p>Aucun facteur de risque particulier.</p>{% endif %}
+  <p><small>Aide à la décision : le niveau doit être validé par un soignant.</small></p>
+</div>
+
+<a class="btn btn-primary" href="{{ url_for('clinique.rendez_vous') }}"><i class="fas fa-list"></i> Voir les rendez-vous</a>
+<a class="btn btn-secondary" href="{{ url_for('clinique.nouveau_rendez_vous') }}"><i class="fas fa-plus"></i> Autre rendez-vous</a>
+{% endblock %}

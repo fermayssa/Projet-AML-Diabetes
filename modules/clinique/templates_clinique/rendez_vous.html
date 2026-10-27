@@ -3,6 +3,12 @@
 {% block title %}Rendez-vous - Clinique{% endblock %}
 
 {% block content %}
+<style>
+  .urg-badge { color: #fff; padding: 2px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; }
+  .urg-badge.urgent { background: #c0392b; }
+  .urg-badge.priority { background: #e67e22; }
+  .urg-badge.standard { background: #2e86c1; }
+</style>
 <div class="page-header">
   <h1><i class="fas fa-calendar-alt"></i> Gestion des Rendez-vous</h1>
   <a href="{{ url_for('clinique.nouveau_rendez_vous') }}" class="btn btn-primary"><i class="fas fa-calendar-plus"></i> Nouveau Rendez-vous</a>
@@ -11,34 +17,41 @@
 <div class="table-container">
   <table class="data-table">
     <thead>
-      <tr>
-        <th>ID</th>
-        <th>Patient</th>
-        <th>Date</th>
-        <th>Heure</th>
-        <th>Type</th>
-        <th>Statut</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for rdv in rendez_vous %}
-      <tr>
-        <td>{{ rdv.id }}</td>
-        <td>{{ rdv.patient }}</td>
-        <td>{{ rdv.date }}</td>
-        <td>{{ rdv.heure }}</td>
-        <td>{{ rdv.type }}</td>
-        <td><span class="badge {{ rdv.statut|lower }}">{{ rdv.statut }}</span></td>
-        <td>
-          <a href="{{ url_for('clinique.edit_rendez_vous', rdv_id=rdv.id) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Modifier</a>
-          <form method="POST" action="{{ url_for('clinique.delete_rendez_vous', rdv_id=rdv.id) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?');">
-            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
+  <tr>
+    <th>ID</th>
+    <th>Patient</th>
+    <th>Date</th>
+    <th>Heure</th>
+    <th>Type</th>
+    <th>Priorité</th>
+    <th>Statut</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+<tbody>
+  {% for rdv in rendez_vous %}
+  <tr>
+    <td>{{ rdv.id }}</td>
+    <td>{{ rdv.patient_nom or '—' }}</td>
+    <td>{{ rdv.date.strftime('%d/%m/%Y') if rdv.date else '—' }}</td>
+    <td>{{ rdv.date.strftime('%H:%M') if rdv.date else '—' }}</td>
+    <td>{{ rdv.type_rdv or '—' }}</td>
+    <td>
+      {% if rdv.urgence %}
+      <span class="urg-badge {{ rdv.urgence }}" title="{{ rdv.raisons or '' }}">
+        {{ {'urgent': 'Urgent', 'priority': 'Prioritaire', 'standard': 'Standard'}[rdv.urgence] }}</span>
+      {% else %}—{% endif %}
+    </td>
+    <td><span class="badge {{ (rdv.statut or '')|lower }}">{{ rdv.statut or '—' }}</span></td>
+    <td>
+      <a href="{{ url_for('clinique.edit_rendez_vous', rdv_id=rdv.id) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Modifier</a>
+      <form method="POST" action="{{ url_for('clinique.delete_rendez_vous', rdv_id=rdv.id) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?');">
+        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
   </table>
 </div>
 
