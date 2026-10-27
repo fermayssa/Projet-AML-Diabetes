@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Estimation de la durée de séjour</h1>
+
+{% if not ready %}
+<div class="warn">
+  <p><b>Modèle non disponible.</b> Vérifiez que <code>model.joblib</code> et <code>config.json</code> sont bien présents dans <code>modules/time_in_hospital/artifacts/</code>.</p>
+</div>
+{% else %}
+<p>Renseignez le profil du patient. Les valeurs manquantes sont complétées par la catégorie la plus fréquente du jeu d'entraînement.</p>
+{% if error %}<div class="error"><b>Erreur :</b> {{ error }}</div>{% endif %}
+
+<form method="post" action="{{ url_for('time_in_hospital.predict') }}">
+  <fieldset>
+    <legend><b>Profil administratif et démographique</b></legend>
+    {% for field in select_fields %}
+      {% if field.name in ['race', 'gender', 'admission_type_id', 'admission_source_id', 'discharge_disposition_id', 'payer_code', 'medical_specialty'] %}
+      <label>{{ field.label or field.name }}
+        <select name="{{ field.name }}">
+          {% for val, text in field.options %}
+          <option value="{{ val }}" {% if val == field.value %}selected{% endif %}>{{ text }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% endif %}
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend><b>Informations cliniques</b></legend>
+    {% for field in numeric_fields %}
+    <label>{{ field.label }}
+      <input type="number" name="{{ field.name }}" min="{{ field.min }}" max="{{ field.max }}" step="1" value="{{ field.value }}" required>
+    </label>
+    {% endfor %}
+
+    {% for field in select_fields %}
+      {% if field.name in ['A1Cresult', 'max_glu_serum', 'readmitted', 'change', 'diabetesMed'] %}
+      <label>{{ field.label or field.name }}
+        <select name="{{ field.name }}">
+          {% for val, text in field.options %}
+          <option value="{{ val }}" {% if val == field.value %}selected{% endif %}>{{ text }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% endif %}
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend><b>Diagnostics et traitements</b></legend>
+    <label>Diagnostic 1
+      <input type="text" name="diag_1" value="428" pattern="[A-Za-z0-9.]+" required>
+    </label>
+    <label>Diagnostic 2
+      <input type="text" name="diag_2" value="250" pattern="[A-Za-z0-9.]+" required>
+    </label>
+    <label>Diagnostic 3
+      <input type="text" name="diag_3" value="" pattern="[A-Za-z0-9.]*" placeholder="optionnel">
+    </label>
+
+    {% for med in ['metformin','repaglinide','nateglinide','chlorpropamide','glimepiride','acetohexamide','glipizide','glyburide','tolbutamide','pioglitazone','rosiglitazone','acarbose','miglitol','troglitazone','tolazamide','insulin','glyburide-metformin','glipizide-metformin','glimepiride-pioglitazone','metformin-rosiglitazone','metformin-pioglitazone'] %}
+    <label>{{ med }}
+      <select name="{{ med }}">
+        <option value="No" selected>No</option>
+        <option value="Steady">Steady</option>
+        <option value="Up">Up</option>
+        <option value="Down">Down</option>
+      </select>
+    </label>
+    {% endfor %}
+  </fieldset>
+
+  <button type="submit">Estimer la durée</button>
+</form>
+{% endif %}
+{% endblock %}

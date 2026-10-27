@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Durée de séjour estimée</h1>
+
+<div class="card">
+  <h2>Classe prédite : {{ result.classe }}</h2>
+  <p>Durée attendue : <strong>{{ result.duree_attendue_jours }} jour{{ 's' if result.duree_attendue_jours > 1 }}</strong></p>
+</div>
+
+<div class="card">
+  <h3>Probabilités par classe</h3>
+  {% for item in result.probabilites %}
+  <div>
+    <div style="display:flex; justify-content:space-between; gap:1rem;">
+      <span>{{ item.label }}</span>
+      <span>{{ item.pourcentage }}%</span>
+    </div>
+    <div style="background:#eee; height:10px; border-radius:5px; overflow:hidden; margin:0.3rem 0 1rem;">
+      <div style="width:{{ item.pourcentage }}%; background:#4a7bdc; height:100%;"></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h3>Métriques du modèle</h3>
+  <ul>
+    <li>Accuracy : {{ result.metrics.accuracy }}</li>
+    <li>F1 macro : {{ result.metrics.f1_macro }}</li>
+    <li>R² hybride : {{ result.metrics.r2_hybrid }}</li>
+  </ul>
+</div>
+
+<p><small>Démonstration pédagogique - ne constitue pas un avis médical.</small></p>
+<p><a href="{{ url_for('time_in_hospital.form') }}">← Nouvelle saisie</a></p>
+{% endblock %}

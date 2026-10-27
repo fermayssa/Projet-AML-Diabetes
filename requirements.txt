@@ -4,5 +4,6 @@
 flask>=3.0
 numpy
 pandas
-scikit-learn
+scikit-learn==1.6.1
+xgboost==3.4.1
 joblib
