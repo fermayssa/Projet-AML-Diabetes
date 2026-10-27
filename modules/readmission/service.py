@@ -27,27 +27,21 @@ LIMITE_DEFAUT = (0, 100)
 
 def _load():
     try:
-        import joblib
-        import sklearn
         import xgboost
         cfg = json.loads((ART / "config.json").read_text(encoding="utf-8"))
-        bundle = joblib.load(ART / "model.joblib")
-        _state.update(cfg=cfg, model=bundle["model"], ready=True)
+        model = xgboost.XGBClassifier()
+        model.load_model(str(ART / "model.json"))
+        _state.update(cfg=cfg, model=model, ready=True)
 
-        ecarts = []
-        for nom, installee in (("sklearn", sklearn.__version__), ("xgboost", xgboost.__version__)):
-            entrainee = cfg.get("versions", {}).get(nom)
-            if entrainee and entrainee != installee:
-                ecarts.append(f"{nom} {entrainee} (installé : {installee})")
-        if ecarts:
-            _state["warning"] = ("Le modèle a été entraîné avec " + ", ".join(ecarts)
-                                 + " : alignez les versions dans requirements.txt.")
+        entrainee = cfg.get("versions", {}).get("xgboost")
+        if entrainee and entrainee != xgboost.__version__:
+            _state["warning"] = (f"Le modèle a été entraîné avec xgboost {entrainee} "
+                                 f"(installé : {xgboost.__version__}).")
     except FileNotFoundError:
-        _state["error"] = ("Modèle non trouvé : exécutez la cellule d'export du notebook et copiez le dossier "
-                           "'artifacts' dans modules/readmission/.")
+        _state["error"] = ("Modèle non trouvé : placez model.json et config.json "
+                           "dans modules/readmission/artifacts/.")
     except Exception as exc:
         _state["error"] = f"Erreur au chargement du modèle : {exc!r}"
-
 
 _load()
 
