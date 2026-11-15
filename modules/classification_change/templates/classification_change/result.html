@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Résultat : changement de traitement{% endblock %}
+{% block content %}
+
+<style>
+  .cc-card { background:#fff; border:1px solid #d8e0ea; border-left:6px solid #1f4e79; border-radius:8px; padding:14px 18px; margin:14px 0; }
+  .cc-card p { margin:6px 0 0; }
+  .cc-probable  { border-left-color:#c0392b; background:#fdecea; }
+  .cc-possible  { border-left-color:#e6a100; background:#fff8e1; }
+  .cc-peu       { border-left-color:#2e8b57; background:#eaf7ef; }
+  .cc-table { border-collapse:collapse; background:#fff; margin:10px 0 20px; }
+  .cc-table th, .cc-table td { border:1px solid #d8e0ea; padding:10px 14px; text-align:left; }
+  .cc-bar { background:#d0dcea; width:160px; height:8px; border-radius:4px; display:inline-block; vertical-align:middle; margin-left:8px; }
+  .cc-bar div { background:#1f4e79; height:8px; border-radius:4px; }
+  .cc-note { color:#555; font-size:13px; }
+  .cc-reco { background:#fff; border:1px solid #d8e0ea; border-top:5px solid #1f4e79; border-radius:8px; padding:6px 20px 14px; margin:10px 0 20px; }
+  .cc-reco h4 { margin:14px 0 6px; color:#1f4e79; }
+  .cc-reco ul { margin:0; padding-left:20px; }
+  .cc-reco li { margin-bottom:6px; }
+</style>
+
+{# ---------- 1) Niveau ---------- #}
+{% if r.niveau == 'probable' %}
+  {% set cls = 'cc-probable' %}
+  {% set titre = 'Le traitement va probablement changer' %}
+  {% set resume = 'L\'analyse indique que les médicaments contre le diabète de ce patient risquent d\'être modifiés (nouveau médicament, arrêt ou changement de dose).' %}
+{% elif r.niveau == 'possible' %}
+  {% set cls = 'cc-possible' %}
+  {% set titre = 'Un changement de traitement est possible' %}
+  {% set resume = 'L\'analyse ne permet pas de dire clairement si le traitement va changer ou rester le même. Il vaut mieux rester attentif.' %}
+{% else %}
+  {% set cls = 'cc-peu' %}
+  {% set titre = 'Le traitement devrait rester le même' %}
+  {% set resume = 'L\'analyse indique que les médicaments contre le diabète de ce patient ne vont probablement pas changer.' %}
+{% endif %}
+
+{# ---------- 2) Points à surveiller (valeurs saisies) ---------- #}
+{% set s = r.saisie %}
+{% set points = [] %}
+{% if s.A1Cresult == '>8' %}{% set _ = points.append({'nom':'Sucre dans le sang mal contrôlé depuis plusieurs semaines','detail':'Analyse HbA1c : au-dessus de 8 %','action':'Revoir le traitement avec le médecin, car le sucre reste trop élevé.'}) %}
+{% elif s.A1Cresult == '>7' %}{% set _ = points.append({'nom':'Sucre dans le sang un peu trop élevé depuis plusieurs semaines','detail':'Analyse HbA1c : entre 7 % et 8 %','action':'Surveiller la glycémie et refaire l\'analyse HbA1c plus tard.'}) %}{% endif %}
+{% if s.max_glu_serum in ['>200', '>300'] %}{% set _ = points.append({'nom':'Taux de sucre très élevé pendant le séjour','detail':'Glycémie maximale : ' ~ s.max_glu_serum ~ ' mg/dL','action':'Contrôler la glycémie régulièrement et adapter le traitement.'}) %}{% endif %}
+{% if s.time_in_hospital >= 7 %}{% set _ = points.append({'nom':'Séjour long à l\'hôpital','detail': s.time_in_hospital ~ ' jours d\'hospitalisation','action':'Bien expliquer le traitement avant la sortie.'}) %}{% endif %}
+{% if s.num_medications >= 15 %}{% set _ = points.append({'nom':'Beaucoup de médicaments','detail': s.num_medications ~ ' médicaments différents','action':'Faire le point sur tous les médicaments pour éviter les oublis et les mélanges à risque.'}) %}{% endif %}
+{% if s.number_diagnoses >= 7 %}{% set _ = points.append({'nom':'Plusieurs maladies en même temps','detail': s.number_diagnoses ~ ' diagnostics','action':'Faire coordonner les médecins pour avoir un seul plan de soins.'}) %}{% endif %}
+{% if s.number_inpatient >= 1 %}{% set _ = points.append({'nom':'Déjà hospitalisé récemment','detail': s.number_inpatient ~ ' hospitalisation(s) l\'année dernière','action':'Chercher pourquoi le patient est revenu à l\'hôpital.'}) %}{% endif %}
+{% if s.number_emergency >= 1 %}{% set _ = points.append({'nom':'Passages aux urgences récents','detail': s.number_emergency ~ ' passage(s) aux urgences l\'année dernière','action':'Comprendre ce qui a causé ces passages aux urgences.'}) %}{% endif %}
+
+<h1>{{ titre }}</h1>
+
+<div class="cc-card {{ cls }}">
+  <b>En résumé</b>
+  <p>{{ resume }} Probabilité estimée de changement de traitement : <b>{{ r.p_change_pct }} %</b>.</p>
+</div>
+
+{# ---------- 3) Probabilités ---------- #}
+<h3>Estimation pour ce patient</h3>
+<table class="cc-table">
+  <tr><th>Situation</th><th>Ce que ça veut dire</th><th>Probabilité</th></tr>
+  <tr {% if r.change %}style="font-weight:bold"{% endif %}>
+    <td>Le traitement change</td>
+    <td>Nouveau médicament, arrêt d'un médicament ou changement de dose.</td>
+    <td>{{ r.p_change_pct }} %<span class="cc-bar"><div style="width:{{ r.p_change_pct }}%"></div></span></td>
+  </tr>
+  <tr {% if not r.change %}style="font-weight:bold"{% endif %}>
+    <td>Le traitement reste le même</td>
+    <td>Le patient garde les mêmes médicaments.</td>
+    <td>{{ r.p_no_change_pct }} %<span class="cc-bar"><div style="width:{{ r.p_no_change_pct }}%"></div></span></td>
+  </tr>
+</table>
+
+{# ---------- 4) Points à surveiller ---------- #}
+<h3>Points à surveiller chez ce patient</h3>
+{% if points %}
+  <p class="cc-note">Éléments repérés dans les informations saisies :</p>
+  {% for x in points %}
+  <div class="cc-card cc-possible">
+    <b>{{ x.nom }}</b>
+    <p>{{ x.detail }}</p>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Rien de particulier n'a été repéré dans les informations saisies.</p>
+{% endif %}
+<p class="cc-note">Ces points aident à réfléchir, mais ils ne sont pas la preuve que le traitement va changer.</p>
+
+{# ---------- 5) Conseils ---------- #}
+<h3>Conseils</h3>
+<div class="cc-reco {{ cls }}">
+  {% if r.niveau == 'probable' %}
+    <h4>Pendant le séjour</h4>
+    <ul>
+      <li>Parler du traitement avec le médecin responsable.</li>
+      <li>Contrôler régulièrement la glycémie (taux de sucre dans le sang).</li>
+    </ul>
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Expliquer clairement au patient les médicaments à prendre et les changements éventuels.</li>
+      <li>Donner un papier avec la liste des médicaments et les signes à surveiller.</li>
+    </ul>
+    <h4>Après la sortie</h4>
+    <ul>
+      <li>Prévoir un rendez-vous de contrôle rapide.</li>
+      <li>Demander au patient de surveiller sa glycémie à la maison.</li>
+    </ul>
+  {% elif r.niveau == 'possible' %}
+    <h4>Pendant le séjour</h4>
+    <ul>
+      <li>Suivre la glycémie et noter les valeurs.</li>
+    </ul>
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Vérifier que le patient a bien compris son traitement.</li>
+      <li>Prévoir un rendez-vous de contrôle.</li>
+    </ul>
+  {% else %}
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Continuer le traitement actuel.</li>
+      <li>Garder les rendez-vous de suivi habituels avec le médecin.</li>
+    </ul>
+  {% endif %}
+  {% if points %}
+    <h4>Actions pour ce patient</h4>
+    <ul>{% for x in points %}<li>{{ x.action }}</li>{% endfor %}</ul>
+  {% endif %}
+</div>
+
+<h3>Comment lire ce résultat</h3>
+<p>
+  Cette estimation compare ce patient à des milliers de patients diabétiques déjà soignés dans des hôpitaux.
+  Elle indique la probabilité que le traitement contre le diabète soit modifié pendant le séjour.
+  Plus le pourcentage de « Le traitement change » est élevé, plus un changement est probable.
+</p>
+<p><small>
+  Ce résultat est une estimation, il peut se tromper. Il sert d'aide et ne remplace jamais l'avis du médecin.
+  Application de démonstration pour un cours.
+</small></p>
+
+<p><a href="{{ url_for('classification_change.form') }}">← Nouvelle saisie</a></p>
+{% endblock %}

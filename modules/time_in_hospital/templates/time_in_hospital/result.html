@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Durée de séjour estimée{% endblock %}
+{% block content %}
+<style>
+  .th-card { background:#fff; border:1px solid #d8e0ea; border-left:6px solid #1f4e79; border-radius:8px; padding:14px 18px; margin:14px 0; }
+  .th-card p { margin:6px 0 0; }
+  .th-court { border-left-color:#2e8b57; background:#eaf7ef; }
+  .th-moyen { border-left-color:#e6a100; background:#fff8e1; }
+  .th-long  { border-left-color:#c0392b; background:#fdecea; }
+  .th-table { border-collapse:collapse; background:#fff; margin:10px 0 20px; }
+  .th-table th, .th-table td { border:1px solid #d8e0ea; padding:10px 14px; text-align:left; }
+  .th-bar { background:#d0dcea; width:160px; height:8px; border-radius:4px; display:inline-block; vertical-align:middle; margin-left:8px; }
+  .th-bar div { background:#1f4e79; height:8px; border-radius:4px; }
+  .th-note { color:#555; font-size:13px; }
+  .th-reco { background:#fff; border:1px solid #d8e0ea; border-top:5px solid #1f4e79; border-radius:8px; padding:6px 20px 14px; margin:10px 0 20px; }
+  .th-reco h4 { margin:14px 0 6px; color:#1f4e79; }
+  .th-reco ul { margin:0; padding-left:20px; }
+  .th-reco li { margin-bottom:6px; }
+</style>
+
+{% set i = result.classe_index %}
+{% set jours = result.duree_attendue_jours|round(1)|string|replace('.', ',') %}
+{% if i == 0 %}
+  {% set cls = 'th-court' %}
+  {% set titre = 'Séjour court prévu' %}
+  {% set resume = "L'analyse indique que ce patient devrait rester à l'hôpital 1 à 3 jours." %}
+{% elif i == 1 %}
+  {% set cls = 'th-moyen' %}
+  {% set titre = 'Séjour moyen prévu' %}
+  {% set resume = "L'analyse indique que ce patient devrait rester à l'hôpital 4 à 6 jours." %}
+{% else %}
+  {% set cls = 'th-long' %}
+  {% set titre = 'Séjour long prévu' %}
+  {% set resume = "L'analyse indique que ce patient devrait rester à l'hôpital 7 jours ou plus." %}
+{% endif %}
+
+{# ---------- Points à surveiller (valeurs saisies) ---------- #}
+{% set f = request.form %}
+{% set points = [] %}
+{% if f.get('number_inpatient', 0)|int >= 1 %}{% set _ = points.append({'nom':"Déjà hospitalisé récemment", 'detail': f.get('number_inpatient') ~ " hospitalisation(s) l'année dernière", 'action':"Regarder pourquoi le patient est déjà venu à l'hôpital."}) %}{% endif %}
+{% if f.get('number_emergency', 0)|int >= 1 %}{% set _ = points.append({'nom':"Passages aux urgences récents", 'detail': f.get('number_emergency') ~ " passage(s) aux urgences l'année dernière", 'action':"Chercher ce qui a causé ces passages aux urgences."}) %}{% endif %}
+{% if f.get('num_medications', 0)|int >= 15 %}{% set _ = points.append({'nom':"Beaucoup de médicaments", 'detail': f.get('num_medications') ~ " médicaments différents", 'action':"Faire le point sur tous les médicaments pour éviter les oublis et les mélanges à risque."}) %}{% endif %}
+{% if f.get('number_diagnoses', 0)|int >= 7 %}{% set _ = points.append({'nom':"Plusieurs maladies en même temps", 'detail': f.get('number_diagnoses') ~ " diagnostics", 'action':"Faire coordonner les médecins pour avoir un seul plan de soins."}) %}{% endif %}
+{% if f.get('A1Cresult', '') in ['>7', '>8'] %}{% set _ = points.append({'nom':"Sucre dans le sang trop élevé depuis plusieurs semaines", 'detail':"Analyse HbA1c : " ~ f.get('A1Cresult'), 'action':"Revoir le traitement avec le médecin et contrôler la glycémie."}) %}{% endif %}
+{% if f.get('insulin', '') in ['Up', 'Down'] %}{% set _ = points.append({'nom':"Dose d'insuline modifiée", 'detail':"L'insuline a été changée pendant le séjour", 'action':"Vérifier que le patient comprend sa nouvelle dose."}) %}{% endif %}
+{% if f.get('age', 0)|int >= 75 %}{% set _ = points.append({'nom':"Patient âgé", 'detail': f.get('age') ~ " ans", 'action':"Prévoir un accompagnement à la sortie (famille, aide à domicile)."}) %}{% endif %}
+
+<h1>{{ titre }}</h1>
+
+<div class="th-card {{ cls }}">
+  <b>En résumé</b>
+  <p>{{ resume }} Durée estimée : environ <b>{{ jours }} jours</b>.</p>
+</div>
+
+<h3>Estimation pour ce patient</h3>
+<table class="th-table">
+  <tr><th>Durée du séjour</th><th>Probabilité</th></tr>
+  {% for p in result.probabilites %}
+  <tr {% if loop.index0 == i %}style="font-weight:bold"{% endif %}>
+    <td>
+      {% if loop.index0 == 0 %}Court (1 à 3 jours)
+      {% elif loop.index0 == 1 %}Moyen (4 à 6 jours)
+      {% else %}Long (7 jours ou plus){% endif %}
+    </td>
+    <td>{{ p.pourcentage }} %<span class="th-bar"><div style="width:{{ p.pourcentage }}%"></div></span></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>Points à surveiller chez ce patient</h3>
+{% if points %}
+  <p class="th-note">Éléments repérés dans les informations saisies :</p>
+  {% for x in points %}
+  <div class="th-card th-moyen">
+    <b>{{ x.nom }}</b>
+    <p>{{ x.detail }}</p>
+  </div>
+  {% endfor %}
+{% else %}
+  <p>Rien de particulier n'a été repéré dans les informations saisies.</p>
+{% endif %}
+<p class="th-note">Ces points aident à réfléchir, mais ils ne changent pas à eux seuls la durée du séjour.</p>
+
+<h3>Conseils</h3>
+<div class="th-reco {{ cls }}">
+  {% if i == 0 %}
+    <h4>Pendant le séjour</h4>
+    <ul>
+      <li>Prévoir une sortie rapide si l'état du patient le permet.</li>
+      <li>Expliquer le traitement dès le début.</li>
+    </ul>
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Donner les consignes par écrit et fixer un rendez-vous de contrôle.</li>
+    </ul>
+  {% elif i == 1 %}
+    <h4>Pendant le séjour</h4>
+    <ul>
+      <li>Suivre l'évolution chaque jour et vérifier que les examens avancent.</li>
+      <li>Préparer la sortie dès le milieu du séjour.</li>
+    </ul>
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Vérifier que le patient a compris son traitement et fixer un rendez-vous de contrôle.</li>
+    </ul>
+  {% else %}
+    <h4>Pendant le séjour</h4>
+    <ul>
+      <li>Prévoir un lit pour une durée longue et prévenir l'équipe.</li>
+      <li>Faire le point régulièrement avec le médecin responsable.</li>
+      <li>Préparer la sortie tôt, avec la famille si possible.</li>
+    </ul>
+    <h4>À la sortie</h4>
+    <ul>
+      <li>Organiser un suivi renforcé après la sortie (appel, rendez-vous rapproché).</li>
+    </ul>
+  {% endif %}
+  {% if points %}
+    <h4>Actions pour ce patient</h4>
+    <ul>{% for x in points %}<li>{{ x.action }}</li>{% endfor %}</ul>
+  {% endif %}
+</div>
+
+<h3>Comment lire ce résultat</h3>
+<p>
+  Cette estimation compare ce patient à des dizaines de milliers de patients diabétiques déjà soignés dans des hôpitaux.
+  Elle indique la durée de séjour la plus probable : plus le pourcentage d'une durée est élevé, plus elle est probable.
+</p>
+<p><small>
+  Dans nos tests, l'estimation tombe dans la bonne catégorie (court, moyen ou long) environ
+  {{ (result.metrics.accuracy * 100)|round|int }} fois sur 100.
+  Ce résultat est une estimation, il peut se tromper. Il sert d'aide et ne remplace jamais l'avis du médecin.
+  Application de démonstration pour un cours.
+</small></p>
+
+<p><a href="{{ url_for('time_in_hospital.form') }}">← Nouvelle saisie</a></p>
+{% endblock %}

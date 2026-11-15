@@ -1,0 +1,292 @@
+{
+  "raw_columns": [
+    "race",
+    "gender",
+    "admission_type",
+    "discharge_disposition",
+    "admission_source",
+    "time_in_hospital",
+    "medical_specialty",
+    "num_lab_procedures",
+    "num_procedures",
+    "num_medications",
+    "number_outpatient",
+    "number_emergency",
+    "number_inpatient",
+    "diag_1",
+    "diag_2",
+    "diag_3",
+    "number_diagnoses",
+    "max_glu_serum",
+    "A1Cresult",
+    "age_num"
+  ],
+  "model_columns": [
+    "num__time_in_hospital",
+    "num__num_lab_procedures",
+    "num__num_procedures",
+    "num__num_medications",
+    "num__number_outpatient",
+    "num__number_emergency",
+    "num__number_inpatient",
+    "num__number_diagnoses",
+    "num__age_num",
+    "cat__race_AfricanAmerican",
+    "cat__race_Asian",
+    "cat__race_Caucasian",
+    "cat__race_Hispanic",
+    "cat__race_Other",
+    "cat__race_Unknown",
+    "cat__gender_Female",
+    "cat__gender_Male",
+    "cat__admission_type_Elective",
+    "cat__admission_type_Emergency",
+    "cat__admission_type_Trauma",
+    "cat__admission_type_Unknown",
+    "cat__admission_type_Urgent",
+    "cat__discharge_disposition_Facility",
+    "cat__discharge_disposition_Home",
+    "cat__discharge_disposition_Home_health",
+    "cat__discharge_disposition_Other",
+    "cat__admission_source_Emergency_Room",
+    "cat__admission_source_Other_Unknown",
+    "cat__admission_source_Referral",
+    "cat__admission_source_Transfer",
+    "cat__medical_specialty_Cardiology",
+    "cat__medical_specialty_Emergency/Trauma",
+    "cat__medical_specialty_Family/GeneralPractice",
+    "cat__medical_specialty_InternalMedicine",
+    "cat__medical_specialty_Nephrology",
+    "cat__medical_specialty_Orthopedics",
+    "cat__medical_specialty_Orthopedics-Reconstructive",
+    "cat__medical_specialty_Other",
+    "cat__medical_specialty_Radiologist",
+    "cat__medical_specialty_Surgery-General",
+    "cat__medical_specialty_Unknown",
+    "cat__diag_1_Circulatory",
+    "cat__diag_1_Diabetes",
+    "cat__diag_1_Digestive",
+    "cat__diag_1_Genitourinary",
+    "cat__diag_1_Injury",
+    "cat__diag_1_Musculoskeletal",
+    "cat__diag_1_Neoplasms",
+    "cat__diag_1_Other",
+    "cat__diag_1_Respiratory",
+    "cat__diag_1_Unknown",
+    "cat__diag_2_Circulatory",
+    "cat__diag_2_Diabetes",
+    "cat__diag_2_Digestive",
+    "cat__diag_2_Genitourinary",
+    "cat__diag_2_Injury",
+    "cat__diag_2_Musculoskeletal",
+    "cat__diag_2_Neoplasms",
+    "cat__diag_2_Other",
+    "cat__diag_2_Respiratory",
+    "cat__diag_2_Unknown",
+    "cat__diag_3_Circulatory",
+    "cat__diag_3_Diabetes",
+    "cat__diag_3_Digestive",
+    "cat__diag_3_Genitourinary",
+    "cat__diag_3_Injury",
+    "cat__diag_3_Musculoskeletal",
+    "cat__diag_3_Neoplasms",
+    "cat__diag_3_Other",
+    "cat__diag_3_Respiratory",
+    "cat__diag_3_Unknown",
+    "cat__max_glu_serum_>200",
+    "cat__max_glu_serum_>300",
+    "cat__max_glu_serum_None",
+    "cat__max_glu_serum_Norm",
+    "cat__A1Cresult_>7",
+    "cat__A1Cresult_>8",
+    "cat__A1Cresult_None",
+    "cat__A1Cresult_Norm"
+  ],
+  "num_cols": [
+    "time_in_hospital",
+    "num_lab_procedures",
+    "num_procedures",
+    "num_medications",
+    "number_outpatient",
+    "number_emergency",
+    "number_inpatient",
+    "number_diagnoses",
+    "age_num"
+  ],
+  "cat_cols": [
+    "race",
+    "gender",
+    "admission_type",
+    "discharge_disposition",
+    "admission_source",
+    "medical_specialty",
+    "diag_1",
+    "diag_2",
+    "diag_3",
+    "max_glu_serum",
+    "A1Cresult"
+  ],
+  "caps": {
+    "time_in_hospital": [
+      1.0,
+      13.0
+    ],
+    "num_lab_procedures": [
+      1.0,
+      85.0
+    ],
+    "num_procedures": [
+      0.0,
+      6.0
+    ],
+    "num_medications": [
+      3.0,
+      44.0
+    ],
+    "number_outpatient": [
+      0.0,
+      1.6094379124341003
+    ],
+    "number_emergency": [
+      0.0,
+      1.0986122886681096
+    ],
+    "number_inpatient": [
+      0.0,
+      1.3862943611198906
+    ],
+    "number_diagnoses": [
+      2.0,
+      9.0
+    ],
+    "age_num": [
+      25.0,
+      95.0
+    ]
+  },
+  "defaults": {
+    "time_in_hospital": 3.0,
+    "num_lab_procedures": 44.0,
+    "num_procedures": 1.0,
+    "num_medications": 14.0,
+    "number_outpatient": 0.0,
+    "number_emergency": 0.0,
+    "number_inpatient": 0.0,
+    "number_diagnoses": 8.0,
+    "age_num": 65.0
+  },
+  "categories": {
+    "race": [
+      "AfricanAmerican",
+      "Asian",
+      "Caucasian",
+      "Hispanic",
+      "Other",
+      "Unknown"
+    ],
+    "gender": [
+      "Female",
+      "Male"
+    ],
+    "admission_type": [
+      "Elective",
+      "Emergency",
+      "Trauma",
+      "Unknown",
+      "Urgent"
+    ],
+    "discharge_disposition": [
+      "Facility",
+      "Home",
+      "Home_health",
+      "Other"
+    ],
+    "admission_source": [
+      "Emergency_Room",
+      "Other_Unknown",
+      "Referral",
+      "Transfer"
+    ],
+    "medical_specialty": [
+      "Cardiology",
+      "Emergency/Trauma",
+      "Family/GeneralPractice",
+      "InternalMedicine",
+      "Nephrology",
+      "Orthopedics",
+      "Orthopedics-Reconstructive",
+      "Other",
+      "Radiologist",
+      "Surgery-General",
+      "Unknown"
+    ],
+    "diag_1": [
+      "Circulatory",
+      "Diabetes",
+      "Digestive",
+      "Genitourinary",
+      "Injury",
+      "Musculoskeletal",
+      "Neoplasms",
+      "Other",
+      "Respiratory",
+      "Unknown"
+    ],
+    "diag_2": [
+      "Circulatory",
+      "Diabetes",
+      "Digestive",
+      "Genitourinary",
+      "Injury",
+      "Musculoskeletal",
+      "Neoplasms",
+      "Other",
+      "Respiratory",
+      "Unknown"
+    ],
+    "diag_3": [
+      "Circulatory",
+      "Diabetes",
+      "Digestive",
+      "Genitourinary",
+      "Injury",
+      "Musculoskeletal",
+      "Neoplasms",
+      "Other",
+      "Respiratory",
+      "Unknown"
+    ],
+    "max_glu_serum": [
+      ">200",
+      ">300",
+      "None",
+      "Norm"
+    ],
+    "A1Cresult": [
+      ">7",
+      ">8",
+      "None",
+      "Norm"
+    ]
+  },
+  "modes": {
+    "race": "Caucasian",
+    "gender": "Female",
+    "admission_type": "Emergency",
+    "discharge_disposition": "Home",
+    "admission_source": "Emergency_Room",
+    "medical_specialty": "Unknown",
+    "diag_1": "Circulatory",
+    "diag_2": "Circulatory",
+    "diag_3": "Circulatory",
+    "max_glu_serum": "None",
+    "A1Cresult": "None"
+  },
+  "model_name": "XGBoost",
+  "versions": {
+    "sklearn": "1.8.0",
+    "xgboost": "3.4.1",
+    "pandas": "3.0.2",
+    "numpy": "2.4.4"
+  }
+}

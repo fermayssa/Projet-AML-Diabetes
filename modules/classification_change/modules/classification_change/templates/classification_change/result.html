@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Résultat : changement de traitement{% endblock %}
+{% block content %}
+<style>
+  .cc-card { background:#fff; border:1px solid #d8e0ea; border-left:6px solid #1f4e79; border-radius:8px; padding:14px 18px; margin:14px 0; }
+  .cc-yes { border-left-color:#e6a100; background:#fff8e1; }
+  .cc-no  { border-left-color:#2e8b57; background:#eaf7ef; }
+  .cc-table { border-collapse:collapse; background:#fff; margin:10px 0 20px; }
+  .cc-table th, .cc-table td { border:1px solid #d8e0ea; padding:10px 14px; text-align:left; }
+  .cc-bar { background:#d0dcea; width:160px; height:8px; border-radius:4px; display:inline-block; vertical-align:middle; margin-left:8px; }
+  .cc-bar div { background:#1f4e79; height:8px; border-radius:4px; }
+</style>
+
+<h1>Résultat : changement de traitement</h1>
+
+<div class="cc-card {{ 'cc-yes' if r.change else 'cc-no' }}">
+  {% if r.change %}
+    <b>Changement de traitement probable.</b>
+    <p>Le modèle estime à {{ r.p_change_pct }} % la probabilité que le traitement antidiabétique soit modifié pendant le séjour.</p>
+  {% else %}
+    <b>Changement de traitement peu probable.</b>
+    <p>Le modèle estime à {{ r.p_change_pct }} % la probabilité que le traitement soit modifié : le traitement actuel devrait être maintenu.</p>
+  {% endif %}
+</div>
+
+<h3>Probabilités</h3>
+<table class="cc-table">
+  <tr><th>Scénario</th><th>Probabilité</th></tr>
+  <tr {% if r.change %}style="font-weight:bold"{% endif %}>
+    <td>Traitement modifié</td>
+    <td>{{ r.p_change_pct }} %<span class="cc-bar"><div style="width:{{ r.p_change_pct }}%"></div></span></td>
+  </tr>
+  <tr {% if not r.change %}style="font-weight:bold"{% endif %}>
+    <td>Traitement maintenu</td>
+    <td>{{ r.p_no_change_pct }} %<span class="cc-bar"><div style="width:{{ r.p_no_change_pct }}%"></div></span></td>
+  </tr>
+</table>
+
+<p><small>Démonstration pédagogique : ce résultat est une estimation statistique à valider par un clinicien,
+il ne remplace pas l'avis médical.</small></p>
+
+<p><a href="{{ url_for('classification_change.form') }}">← Nouvelle saisie</a></p>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Durée de séjour hospitalier{% endblock %}
+{% block content %}
+<style>
+  .th-form fieldset { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px 20px 20px; margin-bottom:16px; }
+  .th-form legend { font-weight:700; color:#4c1d95; padding:0 8px; }
+  .th-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .th-form label { display:flex; flex-direction:column; gap:4px; font-size:14px; color:#374151; }
+  .th-form input, .th-form select { padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#fff; }
+  .th-hint { font-size:12px; color:#6b7280; }
+  .th-submit { background:linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; border:0; padding:12px 24px; border-radius:10px; font-size:16px; cursor:pointer; }
+</style>
+
+{# libellés simples pour les champs techniques #}
+{% set libelles = {
+  'admission_source_id': "Provenance à l'admission",
+  'admission_type_id': "Type d'admission",
+  'discharge_disposition_id': "Destination à la sortie",
+  'gender': "Sexe",
+  'medical_specialty': "Spécialité médicale",
+  'payer_code': "Assurance / payeur",
+  'race': "Origine",
+  'A1Cresult': "Résultat HbA1c",
+  'max_glu_serum': "Glycémie sérique maximale",
+  'change': "Changement de traitement",
+  'diabetesMed': "Médicament antidiabétique prescrit",
+  'readmitted': "Réadmission"
+} %}
+{% set groupe_profil = ['gender','race','admission_type_id','admission_source_id','discharge_disposition_id','medical_specialty','payer_code'] %}
+{% set groupe_clinique = ['A1Cresult','max_glu_serum','change','diabetesMed','readmitted'] %}
+{% set medicaments = ['metformin','repaglinide','nateglinide','chlorpropamide','glimepiride','acetohexamide','glipizide','glyburide','tolbutamide','pioglitazone','rosiglitazone','acarbose','miglitol','troglitazone','tolazamide','insulin','glyburide-metformin','glipizide-metformin','glimepiride-pioglitazone','metformin-rosiglitazone','metformin-pioglitazone'] %}
+{% set choix_med = [('No','Non prescrit'),('Steady','Dose stable'),('Up','Dose augmentée'),('Down','Dose diminuée')] %}
+
+<div class="page-header"><h1><i class="fas fa-bed"></i> Estimation de la durée de séjour</h1></div>
+<p>Renseignez le profil du patient. Les informations non renseignées sont remplacées par les valeurs les plus fréquentes.</p>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+{% if not ready %}
+  <div class="alert alert-danger">L'outil n'est pas disponible : fichiers du module introuvables (dossier artifacts).</div>
+{% else %}
+<form class="th-form" method="post" action="{{ url_for('time_in_hospital.predict') }}">
+
+  <fieldset><legend>Profil du patient</legend>
+    <div class="th-grid">
+    {% for f in select_fields if f.name in groupe_profil %}
+      <label>{{ libelles.get(f.name, f.label) }}
+        <select name="{{ f.name }}">
+          {% for val, lib in f.options %}
+          <option value="{{ val }}" {{ 'selected' if val|string == f.value|string }}>{{ lib }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset><legend>Informations cliniques</legend>
+    <div class="th-grid">
+    {% for f in numeric_fields %}
+      <label>{{ f.label }}
+        <input type="number" name="{{ f.name }}" min="{{ f.min }}" max="{{ f.max }}" step="1" required value="{{ f.value }}">
+      </label>
+    {% endfor %}
+    {% for f in select_fields if f.name in groupe_clinique %}
+      <label>{{ libelles.get(f.name, f.label) }}
+        <select name="{{ f.name }}">
+          {% for val, lib in f.options %}
+          <option value="{{ val }}" {{ 'selected' if val|string == f.value|string }}>{{ lib }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset><legend>Diagnostics</legend>
+    <div class="th-grid">
+      <label>Diagnostic principal
+        <input type="text" name="diag_1" required placeholder="ex. 428" value="{{ request.form.get('diag_1', '428') }}">
+        <span class="th-hint">Code à 3 chiffres (CIM-9), ex. 428 = insuffisance cardiaque</span>
+      </label>
+      <label>Diagnostic secondaire
+        <input type="text" name="diag_2" required placeholder="ex. 250" value="{{ request.form.get('diag_2', '250') }}">
+        <span class="th-hint">ex. 250 = diabète</span>
+      </label>
+      <label>Diagnostic additionnel (facultatif)
+        <input type="text" name="diag_3" placeholder="facultatif" value="{{ request.form.get('diag_3', '') }}">
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset><legend>Traitements antidiabétiques</legend>
+    <div class="th-grid">
+    {% for m in medicaments %}
+      <label>{{ m|capitalize }}
+        <select name="{{ m }}">
+          {% for val, lib in choix_med %}
+          <option value="{{ val }}" {{ 'selected' if val == request.form.get(m, 'No') }}>{{ lib }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endfor %}
+    </div>
+  </fieldset>
+
+  <button type="submit" class="th-submit"><i class="fas fa-search"></i> Estimer la durée</button>
+</form>
+{% endif %}
+{% endblock %}
